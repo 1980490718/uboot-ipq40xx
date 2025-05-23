@@ -1,5 +1,5 @@
 export BUILD_TOPDIR=$(PWD)
-export STAGING_DIR=/home/a/uboot-ipq40xx1/openwrt-sdk-ipq806x-qsdk53/staging_dir
+export STAGING_DIR=/home/runner/work/uboot-ipq40/uboot-ipq40/openwrt-sdk-ipq806x/staging_dir
 export TOOLPATH=$(STAGING_DIR)/toolchain-arm_cortex-a7_gcc-4.8-linaro_uClibc-1.0.14_eabi/
 export PATH:=$(TOOLPATH)/bin:${PATH}
 export MAKECMD=make --silent ARCH=arm CROSS_COMPILE=arm-openwrt-linux-
