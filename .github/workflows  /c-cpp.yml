@@ -1,0 +1,82 @@
+name: Compile ssh
+
+on:
+  repository_dispatch:
+  
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        type: choice
+        default: 'false'
+        options:
+        - 'true'
+        - 'false'
+
+              
+env:
+  REPO_URL: https://github.com/openwrt/openwrt
+  REPO_BRANCH: master
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: .config
+  DIY_P1_SH: diy-part1.sh
+  DIY_P2_SH: diy-part2.sh
+  UPLOAD_BIN_DIR: false
+  UPLOAD_FIRMWARE: true
+  UPLOAD_RELEASE: true
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+        sudo docker image prune --all --force
+        sudo -E apt-get -qq update
+        sudo apt-get install -y build-essential gcc-arm-linux-gnueabi bison flex libssl-dev
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+        git clone https://github.com/gl-inet/uboot-ipq40xx.git
+        git clone https://github.com/cubieb/openwrt-sdk-ipq806x.git
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+
+
+
+   
+        
+ #       $GITHUB_WORKSPACE/$DIY_P2_SH
+    - name: SSH connection to Actions
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      env:
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    - name: Download package
+      id: package
+      run: |
+        
+        make 
+
+    - name: Compile the firmware
+      id: compile
+      run: |
+        
+        make 
+      
+
+    - name: Upload binaries
+      uses: actions/upload-artifact@v4
+      with:
+         name: u-boot
+         path: "bin/"
