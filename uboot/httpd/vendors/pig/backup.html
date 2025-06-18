@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>固件备份</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="main-container">
+		<aside class="sidebar">
+			<ul class="sidebar-nav">
+				<li class="sidebar-nav-item"><a href="index.html">固件更新</a></li>
+				<li class="sidebar-nav-item"><a href="uboot.html">U-BOOT更新</a></li>
+				<li class="sidebar-nav-item"><a href="art.html">ART更新</a></li>
+				<li class="sidebar-nav-item"><a href="mibib.html">MIBIB更新</a></li>
+				<li class="sidebar-nav-item"><a href="mac.html">MAC管理</a></li>
+				<li class="sidebar-nav-item"><a href="env.html">变量管理</a></li>
+				<li class="sidebar-nav-item active"><a>固件备份</a></li>
+			</ul>
+		</aside>
+		<main class="main-content">
+			<div class="card">
+				<h2>固件备份</h2>
+				<p>此页面您可以对设备的固件进行<strong>备份</strong>操作。请先点击<strong>读取固件</strong>按钮，将固件<br>加载到内存后，再点击<strong>备份固件</strong>按钮进行备份。点击<strong>重启设备</strong>按钮可重启设备。</p>
+				<div id="backup-operations" class="form-group">
+					<div class="backup-input-group">
+						<div><label for="firmware-info"><strong>固件信息(Size@Address):</strong></label><input type="text" id="firmware-info" class="form-control" readonly placeholder="点击“读取固件”按钮等待完成后才能显示固件信息。"></div>
+						<div><label for="firmware-type"><strong>固件类型(OpenWRT/QSDK/未知):</strong></label><input type="text" id="firmware-type" class="form-control" readonly placeholder="读取完成后显示固件类型。"></div>
+					</div>
+				</div>
+				<div class="backup-button-container"><button type="button" class="submit-btn" id="read-btn">读取固件</button><button type="button" class="submit-btn" id="download-btn" disabled>备份固件</button><button type="button" class="submit-btn reboot-btn" id="reboot-btn">重启设备</button></div>
+				<div class="warning-box" id="warning-box"><strong>温馨提示：</strong><ul><li>读取固件过程可能需要一些时间，请耐心等待。</li><li>备份固件前请确保已成功读取固件到内存。</li><li>重启设备操作可能会中断当前未完成的任务，请谨慎操作。</li></ul></div>
+			</div>
+		</main>
+	</div>
+	<script>
+		const warningBox = document.getElementById('warning-box');
+		var firmwareLoaded = false;
+		const readBtn = document.getElementById('read-btn');
+		const downloadBtn = document.getElementById('download-btn');
+		const rebootBtn = document.getElementById('reboot-btn');
+		const firmwareInfoInput = document.getElementById('firmware-info');
+		const firmwareTypeInput = document.getElementById('firmware-type');
+		document.getElementById('read-btn').onclick = function () {
+			downloadBtn.disabled = true;
+			rebootBtn.disabled = true;
+			readBtn.disabled = true;
+			readBtn.textContent = '固件读取中...';
+			warningBox.innerHTML = '<div class="loading">•请求已收到!<br>•正在尝试读取固件到内存中。<br>•读取过程中可能需要一些时间,请耐心等待读取完成...</div>';
+			fetch('/read_firmware', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+			}).then(r => r.text()).then(t => {
+				if (t.indexOf('Success') !== -1) {
+					const size = t.match(/Size:\s*([^,\n]+)/)[1];
+					const address = t.match(/Address:\s*([^,\n]+)/)[1];
+					const firmwareType = t.match(/Firmware Type:\s*([^,\n]+)/)[1];
+					firmwareInfoInput.value = `${size}@${address}`;
+					firmwareTypeInput.value = firmwareType;
+					warningBox.innerHTML = `<div class="success">•读取固件成功！请点击<b>备份固件</b>按钮下载到本地。<br>
+					•<b>Size:</b> ${size}<br>
+					•<b>Address:</b> ${address}<br>
+					•<b>RAM address:</b> 0x88000000<br>
+					•<b>Board:</b> ${t.match(/Board:\s*([^,\n]+)/)[1]}<br>
+					•<b>Firmware Type:</b> ${firmwareType}</div>`;
+					firmwareLoaded = true;
+					downloadBtn.disabled = false;
+				} else {
+					warningBox.innerHTML = `<div class="error">•读取失败: ${t}<br>•请检查设备闪存状态是否正常!<br>•如果闪存状态正常,请重启设备后重试。</div>`;
+					firmwareLoaded = false;
+					downloadBtn.disabled = true;
+				}
+			}).catch(error => {
+				warningBox.innerHTML = `<div class="error">•接口或者网络错误: ${error.message}!<br>•请检查接口或者网络是否正常!<br>•请设置正确的接口或者正确的IP地址后重试。</div>`;
+				firmwareLoaded = false;
+				downloadBtn.disabled = true;
+			}).finally(() => {
+				readBtn.disabled = false;
+				readBtn.textContent = '读取固件';
+				rebootBtn.disabled = false;
+			});
+		};
+		document.getElementById('download-btn').onclick = function () {
+			if (!firmwareLoaded) {
+				warningBox.innerHTML = '<div class="error">请先点击“读取固件”按钮，将固件加载到内存后再进行备份操作。</div>';
+				return;
+			}
+			readBtn.disabled = true;
+			downloadBtn.disabled = true;
+			downloadBtn.textContent = '固件下载中...';
+			warningBox.innerHTML = '<div class="loading">请求已收到！<br>正在将内存中的固件下载到本地。<br>下载过程中可能需要一些时间，请耐心等待下载完成...</div>';
+			fetch('/download_firmware', {
+				method: 'GET'
+			}).then(response => {
+				if (response.ok) {
+					return response.blob();
+				} else {
+					throw new Error(`下载失败: ${response.status}，服务器返回错误状态码。`);
+				}
+			}).then(blob => {
+				const url = window.URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.style.display = 'none';
+				a.href = url;
+				a.download = 'firmware_backup.bin';
+				document.body.appendChild(a);
+				a.click();
+				window.URL.revokeObjectURL(url);
+				document.body.removeChild(a);
+				warningBox.innerHTML = '<div class="success">•Success: 固件备份完成<br>•保存文件名为：firmware_backup.bin</div>';
+			}).catch(error => {
+				warningBox.innerHTML = `<div class="error">下载错误: ${error.message}，请检查设备连接状态或稍后重试。</div>`;
+			}).finally(() => {
+				readBtn.disabled = false;
+				downloadBtn.disabled = false;
+				downloadBtn.textContent = '备份固件';
+			});
+		};
+		document.getElementById('reboot-btn').onclick = function () {
+			if (confirm('确定要重启设备吗？重启操作可能会中断当前未完成的任务。')) {
+				const warningBox = document.getElementById('warning-box');
+				warningBox.innerHTML = '<div class="loading">重启中...</div>';
+				fetch('/reset', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+				});
+			}
+		};
+	</script>
+	<div class="additional-links"><p class="link-tip">您可以在右方链接中了解本项目的更多信息:<a href="https://github.com/1980490718/uboot-ipq40xx" target="_blank">GitHub</a></p></div>
+</body>
+</html>
