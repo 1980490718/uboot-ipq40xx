@@ -106,7 +106,6 @@ static void httpd_state_reset(void) {
 	hs->dataptr = 0;
 	hs->upload = 0;
 	hs->upload_total = 0;
-	// 添加固件下载状态重置
 	hs->firmware_data = NULL;
 	hs->firmware_size = 0;
 	hs->firmware_sent = 0;
@@ -240,7 +239,6 @@ static void handle_download_firmware_request(void) {
 		uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
 		return;
 	}
-	// 构造HTTP头部，但不包含固件数据
 	char *header_buf = malloc(256);
 	if (header_buf) {
 		snprintf(header_buf, 256,
@@ -250,13 +248,11 @@ static void handle_download_firmware_request(void) {
 			"Content-Length: %u\r\n"
 			"Connection: close\r\n\r\n",
 			firmware_size);
-		// 只发送HTTP头部
 		hs->is_backupfw_resp = 1;
 		hs->backupfw_buf = (u8_t *)header_buf;
 		hs->backupfw_len = strlen(header_buf);
 		hs->dataptr = hs->backupfw_buf;
 		hs->upload = hs->backupfw_len;
-		// 设置固件数据信息供后续发送
 		hs->firmware_data = firmware_data;
 		hs->firmware_size = firmware_size;
 		hs->firmware_sent = 0;
@@ -275,6 +271,35 @@ static void handle_download_firmware_request(void) {
 	}
 }
 extern void gpio_set_value(int gpio_num, int value);
+static void send_http_response(u8_t *buf, int len) {
+	hs->is_macrw_resp = 1;
+	hs->macrw_buf = buf;
+	hs->macrw_len = len;
+	hs->dataptr = hs->macrw_buf;
+	hs->upload = hs->macrw_len;
+	uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
+}
+static int handle_post_request(int (*handler)(int, char **, char *, int), char *resp_buf, int bufsize) {
+	char *body = strstr((char*)uip_appdata, "\r\n\r\n");
+	int resp_len = 0;
+	if (body) {
+		body += 4;
+		int header_len = body - (char*)uip_appdata;
+		int body_len = uip_len - header_len;
+		char *body_copy = malloc(body_len + 1);
+		if (body_copy) {
+			memcpy(body_copy, body, body_len);
+			body_copy[body_len] = '\0';
+			int argc = 0;
+			char *argv[10];
+			parse_url_args(body_copy, &argc, argv, 10);
+			resp_len = handler(argc, argv, resp_buf, bufsize);
+			send_http_response((u8_t *)resp_buf, resp_len);
+			free(body_copy);
+		}
+	}
+	return resp_len;
+}
 void httpd_appcall(void) {
 	struct fs_file fsfile;
 	unsigned int i;
@@ -325,12 +350,7 @@ void httpd_appcall(void) {
 						}
 						char resp_buf[512];
 						int resp_len = web_macrw_handle(argc, argv, resp_buf, sizeof(resp_buf));
-						hs->is_macrw_resp = 1;
-						hs->macrw_buf = (u8_t *)resp_buf;
-						hs->macrw_len = resp_len;
-						hs->dataptr = hs->macrw_buf;
-						hs->upload = hs->macrw_len;
-						uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
+						send_http_response((u8_t *)resp_buf, resp_len);
 						return;
 					} else if (strncmp((char*)&uip_appdata[4], "/download_firmware", 18) == 0) {
 						handle_download_firmware_request();
@@ -339,67 +359,23 @@ void httpd_appcall(void) {
 				}
 				if(hs->state == STATE_UPLOAD_REQUEST){
 					if(strncmp((char*)uip_appdata, "POST /macrw", 11) == 0) {
-						char *body = strstr((char*)uip_appdata, "\r\n\r\n");
-						if (body) {
-							body += 4;
-							int header_len = body - (char*)uip_appdata;
-							int body_len = uip_len - header_len;
-							char *body_copy = malloc(body_len + 1);
-							memcpy(body_copy, body, body_len);
-							body_copy[body_len] = '\0';
-							int argc = 0;
-							char *argv[10];
-							parse_url_args(body_copy, &argc, argv, 10);
-							char resp_buf[512];
-							int resp_len = web_macrw_handle(argc, argv, resp_buf, sizeof(resp_buf));
-							hs->is_macrw_resp = 1;
-							hs->macrw_buf = (u8_t *)resp_buf;
-							hs->macrw_len = resp_len;
-							hs->dataptr = hs->macrw_buf;
-							hs->upload = hs->macrw_len;
-							uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
-							free(body_copy);
-							return;
-						}
+						char resp_buf[512];
+						return;
 					}
 					else if(strncmp((char*)uip_appdata, "POST /setenv", 12) == 0) {
-						char *body = strstr((char*)uip_appdata, "\r\n\r\n");
-						if (body) {
-							body += 4;
-							int header_len = body - (char*)uip_appdata;
-							int body_len = uip_len - header_len;
-							char *body_copy = malloc(body_len + 1);
-							memcpy(body_copy, body, body_len);
-							body_copy[body_len] = '\0';
-							int argc = 0;
-							char *argv[10];
-							parse_url_args(body_copy, &argc, argv, 10);
-							char resp_buf[8192];
-							int resp_len = web_setenv_handle(argc, argv, resp_buf, sizeof(resp_buf));
-							// === print to console ===
-							printf("[WEB setenv] %.*s\n", resp_len, resp_buf);
-							// ========================
-							hs->is_macrw_resp = 1;
-							hs->macrw_buf = (u8_t *)resp_buf;
-							hs->macrw_len = resp_len;
-							hs->dataptr = hs->macrw_buf;
-							hs->upload = hs->macrw_len;
-							uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
-							free(body_copy);
-							return;
-						}
-					} else if(strncmp((char*)uip_appdata, "POST /reset", 11) == 0) {
+						char resp_buf[8192];
+						int resp_len = handle_post_request(web_setenv_handle, resp_buf, sizeof(resp_buf));
+						// print to console
+						printf("[WEB setenv] %.*s\n", resp_len, resp_buf);
+						return;
+					}
+					else if(strncmp((char*)uip_appdata, "POST /reset", 11) == 0) {
 						static char resp_buf[] =
-						"HTTP/1.1 200 OK\r\n"
-						"Content-Type: text/plain\r\n"
-						"Connection: close\r\n\r\n"
-						"Rebooting...\n";
-						hs->is_macrw_resp = 1;
-						hs->macrw_buf = (u8_t *)resp_buf;
-						hs->macrw_len = strlen(resp_buf);
-						hs->dataptr = hs->macrw_buf;
-						hs->upload = hs->macrw_len;
-						uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
+							"HTTP/1.1 200 OK\r\n"
+							"Content-Type: text/plain\r\n"
+							"Connection: close\r\n\r\n"
+							"Rebooting...\n";
+						send_http_response((u8_t *)resp_buf, strlen(resp_buf));
 						do_reset(NULL, 0, 0, NULL);
 						return;
 					} else if(strncmp((char*)uip_appdata, "POST /read_firmware", 19) == 0) {
@@ -545,10 +521,8 @@ void httpd_appcall(void) {
 					}
 					return;
 				}
-				// 处理固件数据发送
 				if (hs->is_firmware_download && hs->firmware_data) {
 					if (hs->upload <= uip_mss()) {
-						// 固件发送完成
 						httpd_state_reset();
 						uip_close();
 						hs->is_firmware_download = 0;
