@@ -5,6 +5,13 @@
 #include <malloc.h>
 #include "ipq40xx_api.h"
 
+// HTTP headers
+#define SERVER_HEADER			"Server: uIP\r\n"
+#define X_CONTENT_TYPE_OPTIONS	"X-Content-Type-Options: nosniff\r\n"
+#define CACHE_CONTROL_NO_CACHE	"Cache-Control: no-cache\r\n"
+#define CONNECTION_CLOSE		"Connection: close\r\n"
+#define COMMON_SECURITY_HEADERS X_CONTENT_TYPE_OPTIONS CACHE_CONTROL_NO_CACHE
+
 #define STATE_NONE		0		// empty state (waiting for request...)
 #define STATE_FILE_REQUEST	1		// remote host sent GET request
 #define STATE_UPLOAD_REQUEST	2		// remote host sent POST request
@@ -204,8 +211,10 @@ static void handle_read_firmware_request(void) {
 	(void)web_handle_read(resp_buf, sizeof(resp_buf));
 	static char http_header[] =
 		"HTTP/1.1 200 OK\r\n"
-		"Content-Type: text/plain\r\n"
-		"Connection: close\r\n\r\n";
+		"Content-Type: text/plain; charset=utf-8\r\n"
+		SERVER_HEADER
+		COMMON_SECURITY_HEADERS
+		CONNECTION_CLOSE "\r\n";
 	hs->is_backupfw_resp = 1;
 	hs->backupfw_buf = (u8_t *)malloc(strlen(http_header) + strlen(resp_buf) + 1);
 	if (hs->backupfw_buf) {
@@ -228,8 +237,10 @@ static void handle_download_firmware_request(void) {
 	if (result != 0) {
 		static char error_resp[] =
 			"HTTP/1.1 404 Not Found\r\n"
-			"Content-Type: text/plain\r\n"
-			"Connection: close\r\n\r\n"
+			"Content-Type: text/plain; charset=utf-8\r\n"
+			SERVER_HEADER
+			COMMON_SECURITY_HEADERS
+			CONNECTION_CLOSE "\r\n"
 			"No firmware loaded";
 		hs->is_backupfw_resp = 1;
 		hs->backupfw_buf = (u8_t *)error_resp;
@@ -246,7 +257,9 @@ static void handle_download_firmware_request(void) {
 			"Content-Type: application/octet-stream\r\n"
 			"Content-Disposition: attachment; filename=\"firmware_backup.bin\"\r\n"
 			"Content-Length: %u\r\n"
-			"Connection: close\r\n\r\n",
+			SERVER_HEADER
+			COMMON_SECURITY_HEADERS
+			CONNECTION_CLOSE "\r\n",
 			firmware_size);
 		hs->is_backupfw_resp = 1;
 		hs->backupfw_buf = (u8_t *)header_buf;
@@ -258,10 +271,27 @@ static void handle_download_firmware_request(void) {
 		hs->firmware_sent = 0;
 		hs->is_firmware_download = 1;
 		uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
+		u16_t bytes_remaining = firmware_size;
+		u16_t bytes_to_send;
+		u8_t *data_ptr = firmware_data;
+		while (bytes_remaining > 0) {
+			u16_t available_window = UIP_RECEIVE_WINDOW;
+			if (available_window <= 0) break;
+			bytes_to_send = available_window;
+			if (bytes_to_send > uip_mss()) bytes_to_send = uip_mss();
+			if (bytes_to_send > bytes_remaining) bytes_to_send = bytes_remaining;
+			uip_send(data_ptr, bytes_to_send);
+			data_ptr += bytes_to_send;
+			bytes_remaining -= bytes_to_send;
+			hs->firmware_sent += bytes_to_send;
+		}
 	} else {
 		static char error_resp[] =
 			"HTTP/1.1 500 Internal Server Error\r\n"
-			"Connection: close\r\n\r\n";
+			"Content-Type: text/plain; charset=utf-8\r\n"
+			SERVER_HEADER
+			COMMON_SECURITY_HEADERS
+			CONNECTION_CLOSE "\r\n";
 		hs->is_backupfw_resp = 1;
 		hs->backupfw_buf = (u8_t *)error_resp;
 		hs->backupfw_len = strlen(error_resp);
@@ -376,7 +406,9 @@ void httpd_appcall(void) {
 						static char resp_buf[] =
 							"HTTP/1.1 200 OK\r\n"
 							"Content-Type: text/plain\r\n"
-							"Connection: close\r\n\r\n"
+							SERVER_HEADER
+							COMMON_SECURITY_HEADERS
+							CONNECTION_CLOSE "\r\n"
 							"Rebooting...\n";
 						send_http_response((u8_t *)resp_buf, strlen(resp_buf));
 						do_reset(NULL, 0, 0, NULL);

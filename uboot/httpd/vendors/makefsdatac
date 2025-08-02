@@ -67,7 +67,7 @@ function print_data_array() {
 	# Additional safe headers
 	`ascii_to_bytes "X-Content-Type-Options: nosniff\r\n" >> "$files_content_tmp"`
 	`echo "," >> "$files_content_tmp"`
-	`ascii_to_bytes "Cache-Control: no-cache, no-store, must-revalidate\r\n" >> "$files_content_tmp"`
+	`ascii_to_bytes "Cache-Control: no-cache\r\n" >> "$files_content_tmp"`
 	`echo "," >> "$files_content_tmp"`
 
 	# Content
@@ -139,9 +139,9 @@ if [ -d vendors/"$vendor_dir"  ]; then # If vendor dir exists
 	`cat "$files_content_tmp" > "fsdata.c"`
 	`cat "$files_list_tmp" >> "fsdata.c"`
 
-	# 删除最后一个逗号（只保留0x00结尾
+	# Remove last comma
 	sed -i 's/,\s*0x00\s*};/ 0x00 };/g' fsdata.c
-	# 删除数组开头的逗号
+	# Remove first comma
 	sed -i 's/{[[:space:]]*,/{/g' fsdata.c
 
 	`rm "$files_content_tmp" "$files_list_tmp"`
