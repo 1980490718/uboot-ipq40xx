@@ -27,7 +27,130 @@
 		</main>
 	</div>
 	<script>
-		const warningBox = document.getElementById('warning-box'); var firmwareLoaded = false; const readBtn = document.getElementById('read-btn'); const downloadBtn = document.getElementById('download-btn'); const rebootBtn = document.getElementById('reboot-btn'); const firmwareInfoInput = document.getElementById('firmware-info'); const firmwareTypeInput = document.getElementById('firmware-type'); document.getElementById('read-btn').onclick = function () { downloadBtn.disabled = true; rebootBtn.disabled = true; readBtn.disabled = true; readBtn.textContent = '固件读取中...'; warningBox.innerHTML = '<div class="loading">•请求已收到!<br>•正在尝试读取固件到内存中。<br>•读取过程中可能需要一些时间,请耐心等待读取完成...</div>'; fetch('/read_firmware', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(r => r.text()).then(t => { if (t.indexOf('Success') !== -1) { const size = t.match(/Size:\s*([^,\n]+)/)[1]; const address = t.match(/Address:\s*([^,\n]+)/)[1]; const firmwareType = t.match(/Firmware Type:\s*([^,\n]+)/)[1]; firmwareInfoInput.value = `${size}@${address}`; firmwareTypeInput.value = firmwareType; warningBox.innerHTML = `<div class="success">•读取固件成功！请点击<b>备份固件</b>按钮下载到本地。<br> •<b>Size:</b> ${size}<br> •<b>Address:</b> ${address}<br> •<b>RAM address:</b> 0x88000000<br> •<b>Board:</b> ${t.match(/Board:\s*([^,\n]+)/)[1]}<br> •<b>Firmware Type:</b> ${firmwareType}</div>`; firmwareLoaded = true; downloadBtn.disabled = false; } else { warningBox.innerHTML = `<div class="error">•读取失败: ${t}<br>•请检查设备闪存状态是否正常!<br>•如果闪存状态正常,请重启设备后重试。</div>`; firmwareLoaded = false; downloadBtn.disabled = true; } }).catch(error => { warningBox.innerHTML = `<div class="error">•接口或者网络错误: ${error.message}!<br>•请检查接口或者网络是否正常!<br>•请设置正确的接口或者正确的IP地址后重试。</div>`; firmwareLoaded = false; downloadBtn.disabled = true; }).finally(() => { readBtn.disabled = false; readBtn.textContent = '读取固件'; rebootBtn.disabled = false; }); }; document.getElementById('download-btn').onclick = function () { if (!firmwareLoaded) { warningBox.innerHTML = '<div class="error">请先点击“读取固件”按钮，将固件加载到内存后再进行备份操作。</div>'; return; } readBtn.disabled = true; downloadBtn.disabled = true; downloadBtn.textContent = '固件下载中...'; warningBox.innerHTML = '<div class="loading">请求已收到！<br>正在将内存中的固件下载到本地。<br>下载过程中可能需要一些时间，请耐心等待下载完成...</div>'; fetch('/download_firmware', { method: 'GET' }).then(response => { if (response.ok) { return response.blob(); } else { throw new Error(`下载失败: ${response.status}，服务器返回错误状态码。`); } }).then(blob => { const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = 'firmware_backup.bin'; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); document.body.removeChild(a); warningBox.innerHTML = '<div class="success">•Success: 固件备份完成<br>•保存文件名为：firmware_backup.bin</div>'; }).catch(error => { warningBox.innerHTML = `<div class="error">下载错误: ${error.message}，请检查设备连接状态或稍后重试。</div>`; }).finally(() => { readBtn.disabled = false; downloadBtn.disabled = false; downloadBtn.textContent = '备份固件'; }); }; document.getElementById('reboot-btn').onclick = function () { if (confirm('确定要重启设备吗？重启操作可能会中断当前未完成的任务。')) { const warningBox = document.getElementById('warning-box'); warningBox.innerHTML = '<div class="loading">重启中...</div>'; fetch('/reset', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }); } };
+		const warningBox = document.getElementById('warning-box');
+		var firmwareLoaded = false;
+		const readBtn = document.getElementById('read-btn');
+		const downloadBtn = document.getElementById('download-btn');
+		const rebootBtn = document.getElementById('reboot-btn');
+		const firmwareInfoInput = document.getElementById('firmware-info');
+		const firmwareTypeInput = document.getElementById('firmware-type');
+		function formatFileSize(bytes) {
+			if (bytes === 0) return '0 MB';
+			const mb = bytes / (1024 * 1024);
+			return mb.toFixed(2) + ' MB';
+		}
+		document.getElementById('read-btn').onclick = function () {
+			downloadBtn.disabled = true;
+			rebootBtn.disabled = true;
+			readBtn.disabled = true;
+			readBtn.textContent = '读取中...';
+			warningBox.innerHTML = '<div class="loading">•请求已收到!<br>•正在尝试读取固件到内存中。<br>•读取过程可能需要一些时间，请耐心等待读取完成...<br><div class="progress-bar"><div class="progress" id="read-progress"></div></div></div>';
+			fetch('/read_firmware', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				}
+			})
+			.then(r => r.text())
+			.then(t => {
+				if (t.indexOf('Success') !== -1) {
+					const sizeMatch = t.match(/Size:\s*([^,\n]+)/);
+					const addressMatch = t.match(/Address:\s*([^,\n]+)/);
+					const firmwareTypeMatch = t.match(/Firmware Type:\s*([^,\n]+)/);
+					if (!sizeMatch || !addressMatch || !firmwareTypeMatch) {
+					  throw new Error("无法解析固件信息: 响应格式不正确");
+					}
+					const size = sizeMatch[1];
+					const address = addressMatch[1];
+					const firmwareType = firmwareTypeMatch[1];
+					firmwareInfoInput.value = `${size}@${address}`;
+					firmwareTypeInput.value = firmwareType;
+					warningBox.innerHTML = `<div class="success">•读取固件成功！请点击<b>备份固件</b>按钮下载到本地。<br>
+					 •<b>Size:</b> ${size}<br>
+					 •<b>Address:</b> ${address}<br>
+					 •<b>RAM address:</b> 0x88000000<br>
+					 •<b>Board:</b> ${t.match(/Board:\s*([^\n]+)/)[1]}<br>
+					 •<b>Firmware Type:</b> ${firmwareType}<br>
+					 ${t.match(/Last Size:\s*([^,]+)/) ? `<b>Last Loaded Size:</b> ${t.match(/Last Size:\s*([^,]+)/)[1]}<br>` : ''}
+					 </div>`;
+					 firmwareLoaded = true;
+					 downloadBtn.disabled = false;
+				} else {
+					warningBox.innerHTML = `<div class="error">•读取失败: ${t}<br>•请检查设备闪存状态是否正常!<br>•如果闪存状态正常,请重启设备后重试。</div>`;
+					firmwareLoaded = false;
+					downloadBtn.disabled = true;
+				}
+			})
+			.catch(error => {
+				warningBox.innerHTML = `<div class="error">•接口或者网络错误: ${error.message}!<br>
+				•错误码: ${error.code || '未知'}<br>
+				•请检查接口或者网络是否正常!<br>
+				•请设置正确的接口或者正确的IP地址后重试。</div>`;
+				firmwareLoaded = false;
+				downloadBtn.disabled = true;
+			})
+			.finally(() => {
+				readBtn.disabled = false;
+				readBtn.textContent = '读取固件';
+				rebootBtn.disabled = false;
+			});
+		};
+		document.getElementById('download-btn').onclick = function () {
+			if (!firmwareLoaded) {
+				if (confirm('固件未加载到内存，是否自动读取固件？')) {
+					document.getElementById('read-btn').click();
+					return;
+				}
+				warningBox.innerHTML = '<div class="error">请先点击“读取固件”按钮，将固件加载到内存后再进行备份操作。</div>';
+				return;
+			}
+			readBtn.disabled = true;
+			downloadBtn.disabled = true;
+			downloadBtn.textContent = '下载中...';
+			warningBox.innerHTML = '<div class="loading">请求已收到！<br>正在将内存中的固件下载到本地。<br>下载过程中可能需要一些时间，请耐心等待下载完成...</div>';
+			fetch('/download_firmware', {
+				method: 'GET'
+			})
+			.then(response => {
+				if (response.ok) {
+					return response.arrayBuffer().then(buffer => new Blob([buffer]));
+				} else {
+					throw new Error(`下载失败: ${response.status}，服务器返回错误状态码。`);
+				}
+			})
+			.then(blob => {
+				const url = window.URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.style.display = 'none';
+				a.href = url;
+				a.download = 'firmware_backup.bin';
+				document.body.appendChild(a);
+				a.click();
+				window.URL.revokeObjectURL(url);
+				document.body.removeChild(a);
+				warningBox.innerHTML = '<div class="success">•Success: 固件备份完成<br>•保存文件名为：firmware_backup.bin<br>•文件大小：' + formatFileSize(blob.size) + '</div>';
+			})
+			.catch(error => {
+				warningBox.innerHTML = `<div class="error">下载错误: ${error.message}，请检查设备连接状态或稍后重试。</div>`;
+			})
+			.finally(() => {
+				readBtn.disabled = false;
+				downloadBtn.disabled = false;
+				downloadBtn.textContent = '备份固件';
+			});
+		};
+		document.getElementById('reboot-btn').onclick = function () {
+			if (confirm('确定要重启设备吗？重启操作可能会中断当前未完成的任务。')) {
+				const warningBox = document.getElementById('warning-box');
+				warningBox.innerHTML = '<div class="loading">重启中...</div>';
+				fetch('/reset', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					}
+				});
+			}
+		};
 	</script>
 	<div class="additional-links"><p class="link-tip">您可以在右方链接中了解本项目的更多信息:<a href="https://github.com/1980490718/uboot-ipq40xx" target="_blank">GitHub</a></p></div>
 </body>
