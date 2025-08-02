@@ -6,10 +6,14 @@
 #include "ipq40xx_api.h"
 
 // HTTP headers
-#define SERVER_HEADER			"Server: uIP\r\n"
+#define SERVER_HEADER		"Server: uIP\r\n"
 #define X_CONTENT_TYPE_OPTIONS	"X-Content-Type-Options: nosniff\r\n"
 #define CACHE_CONTROL_NO_CACHE	"Cache-Control: no-cache\r\n"
-#define CONNECTION_CLOSE		"Connection: close\r\n"
+#define CONNECTION_CLOSE	"Connection: close\r\n"
+#define CONTENT_TYPE	"Content-Type: text/plain; charset=utf-8\r\n"
+#define HTTP_200_OK	"HTTP/1.1 200 OK\r\n"
+#define HTTP_404_NOT_FOUND	"HTTP/1.1 404 Not Found\r\n"
+#define HTTP_500_INTERNAL_ERROR	"HTTP/1.1 500 Internal Server Error\r\n"
 #define COMMON_SECURITY_HEADERS X_CONTENT_TYPE_OPTIONS CACHE_CONTROL_NO_CACHE
 
 #define STATE_NONE		0		// empty state (waiting for request...)
@@ -210,8 +214,8 @@ static void handle_read_firmware_request(void) {
 	char resp_buf[1024];
 	(void)web_handle_read(resp_buf, sizeof(resp_buf));
 	static char http_header[] =
-		"HTTP/1.1 200 OK\r\n"
-		"Content-Type: text/plain; charset=utf-8\r\n"
+		HTTP_200_OK
+		CONTENT_TYPE
 		SERVER_HEADER
 		COMMON_SECURITY_HEADERS
 		CONNECTION_CLOSE "\r\n";
@@ -236,8 +240,8 @@ static void handle_download_firmware_request(void) {
 	int result = web_handle_download(&firmware_data, &firmware_size);
 	if (result != 0) {
 		static char error_resp[] =
-			"HTTP/1.1 404 Not Found\r\n"
-			"Content-Type: text/plain; charset=utf-8\r\n"
+			HTTP_404_NOT_FOUND
+			CONTENT_TYPE
 			SERVER_HEADER
 			COMMON_SECURITY_HEADERS
 			CONNECTION_CLOSE "\r\n"
@@ -253,7 +257,7 @@ static void handle_download_firmware_request(void) {
 	char *header_buf = malloc(256);
 	if (header_buf) {
 		snprintf(header_buf, 256,
-			"HTTP/1.1 200 OK\r\n"
+			HTTP_200_OK
 			"Content-Type: application/octet-stream\r\n"
 			"Content-Disposition: attachment; filename=\"firmware_backup.bin\"\r\n"
 			"Content-Length: %u\r\n"
@@ -287,8 +291,8 @@ static void handle_download_firmware_request(void) {
 		}
 	} else {
 		static char error_resp[] =
-			"HTTP/1.1 500 Internal Server Error\r\n"
-			"Content-Type: text/plain; charset=utf-8\r\n"
+			HTTP_500_INTERNAL_ERROR
+			CONTENT_TYPE
 			SERVER_HEADER
 			COMMON_SECURITY_HEADERS
 			CONNECTION_CLOSE "\r\n";
@@ -404,8 +408,8 @@ void httpd_appcall(void) {
 					}
 					else if(strncmp((char*)uip_appdata, "POST /reset", 11) == 0) {
 						static char resp_buf[] =
-							"HTTP/1.1 200 OK\r\n"
-							"Content-Type: text/plain\r\n"
+							HTTP_200_OK
+							CONTENT_TYPE
 							SERVER_HEADER
 							COMMON_SECURITY_HEADERS
 							CONNECTION_CLOSE "\r\n"
