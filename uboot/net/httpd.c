@@ -3,22 +3,17 @@
  *	(See License)
  *	Copyright 2000, 2001 DENX Software Engineering, Wolfgang Denk, wd@denx.de
  */
-
 #include <common.h>
 #include <command.h>
 #include <net.h>
 #include <asm/byteorder.h>
 #include "httpd.h"
-
 #include "../httpd/uipopt.h"
 #include "../httpd/uip.h"
 #include "../httpd/uip_arp.h"
-
 #include "ipq40xx_api.h"
 #include "ipq40xx_cdp.h"
-
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
-
 static int arptimer = 0;
 extern int	webfailsafe_is_running;
 extern void NetSendHttpd(void);
@@ -34,7 +29,6 @@ void HttpdHandler( void )
 				NetSendHttpd();
 			}
 		}
-
 		if ( ++arptimer == 20 ) {
 			uip_arp_timer();
 			arptimer = 0;
@@ -55,35 +49,26 @@ void HttpdHandler( void )
 			}
 		}
 	}
-
 }
-
 // start http daemon
-void HttpdStart( void )
-{
+void HttpdStart( void ) {
 	uip_init();
 	httpd_init();
 }
-
 extern int do_checkout_firmware(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
 int fw_type;
-int do_http_upgrade( const ulong size, const int upgrade_type )
-{
+int do_http_upgrade( const ulong size, const int upgrade_type ) {
 	char cmd[128] = {0};
-
 	if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_UBOOT ) {
-		printf( "\n\n****************************\n*     U-BOOT UPGRADING     *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n" );
-
+		printf( "\n****************************\n*     U-BOOT UPGRADING     *\n* DO NOT POWER OFF DEVICE! *\n****************************\n" );
 		sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x88000000 0x%x 0x%lx", 
 			CONFIG_UBOOT_START, CONFIG_UBOOT_SIZE, CONFIG_UBOOT_START, size);
 		if(size > CONFIG_UBOOT_SIZE)
 			return 0;
 		run_command(cmd, 0);
 		return 0;
-
 	} else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_FIRMWARE || upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_QSDK_FIRMWARE ) {
-
-		printf( "\n\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n" );
+		printf( "\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n" );
 		fw_type=do_checkout_firmware(NULL, 0, 0, NULL);
 		if ( fw_type == FW_TYPE_OPENWRT ) {
 			switch (gboard_param->machid) {
@@ -119,45 +104,36 @@ int do_http_upgrade( const ulong size, const int upgrade_type )
 		}else {
 			sprintf(cmd, "sf probe && imgaddr=0x88000000 && source $imgaddr:script");
 		}
-
 		run_command(cmd, 0);
 		return 0;
 		
 	} else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_ART ) {
-
-		printf( "\n\n****************************\n*      ART UPGRADING       *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n" );
+		printf( "\n****************************\n*      ART UPGRADING       *\n* DO NOT POWER OFF DEVICE! *\n****************************\n" );
 		sprintf(cmd, "sf probe && sf erase 0x170000 0x10000 && sf write 0x88000000 0x170000 0x10000");
 		run_command(cmd, 0);
 		return 0;
 	} else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_MIBIB ) {
-
-		printf( "\n\n****************************\n*      MIBIB UPGRADING     *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n" );
+		printf( "\n****************************\n*      MIBIB UPGRADING     *\n* DO NOT POWER OFF DEVICE! *\n****************************\n" );
 		sprintf(cmd, "sf probe && sf erase 0x40000 0x20000 && sf write 0x88000000 0x40000 0x20000");
 		run_command(cmd, 0);
 		return 0;
 	} else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_QSDK_FIRMWARE ) {
-
-		printf( "\n\n****************************\n*      FIRMWARE UPGRADING      *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n" );
+		printf( "\n****************************\n*      FIRMWARE UPGRADING      *\n* DO NOT POWER OFF DEVICE! *\n****************************\n" );
 		sprintf(cmd, "imgaddr=0x88000000 && source $imgaddr:script");
 		run_command(cmd, 0);
 		return 0;
-
 	}else {
 		return(-1);
 	}
 	return(-1);
 }
-
 // info about current progress of failsafe mode
 extern void gpio_set_value(int gpio_num, int value);
-int do_http_progress( const int state )
-{
+int do_http_progress( const int state ) {
 	unsigned char i = 0;
-
 	/* toggle LED's here */
 	switch ( state ) {
 		case WEBFAILSAFE_PROGRESS_START:
-
 			// blink LED fast 10 times
 			for ( i = 0; i < 10; ++i ) {
 				/* LEDON(); */
@@ -165,16 +141,12 @@ int do_http_progress( const int state )
 				/* LEDOFF(); */
 				udelay( 25000 );
 			}
-
 			printf( "HTTP server is ready!\n\n" );
 			break;
-
 		case WEBFAILSAFE_PROGRESS_TIMEOUT:
 			//printf("Waiting for request...\n");
 			break;
-
 		case WEBFAILSAFE_PROGRESS_UPLOAD_READY:
-
 			// blink LED fast 10 times
 			for ( i = 0; i < 10; ++i ) {
 				/* LEDON(); */
@@ -182,15 +154,12 @@ int do_http_progress( const int state )
 				/* LEDOFF(); */
 				udelay( 25000 );
 			}
-			printf( "HTTP upload is done! Upgrading...\n" );
+			printf( "HTTP upload is done! Upgrading..." );
 			if(led_tftp_transfer_flashing!=power_led)
 				gpio_set_value(led_tftp_transfer_flashing, LED_OFF);
 			gpio_set_value(power_led, !power_led_active_low);
-
 			break;
-
 		case WEBFAILSAFE_PROGRESS_UPGRADE_READY:
-
 			// blink LED fast 10 times
 			for ( i = 0; i < 10; ++i ) {
 				/* LEDON(); */
@@ -198,12 +167,10 @@ int do_http_progress( const int state )
 				/* LEDOFF(); */
 				udelay( 25000 );
 			}
-			printf( "HTTP upgrade is done! Rebooting...\n\n" );
+			printf( "HTTP upgrade is done! Rebooting...\n" );
 			break;
-
 		case WEBFAILSAFE_PROGRESS_UPGRADE_FAILED:
 			printf( "## Error: HTTP upgrade failed!\n\n" );
-
 			// blink LED fast for 4 sec
 			for ( i = 0; i < 80; ++i ) {
 				/* LEDON(); */
@@ -211,12 +178,9 @@ int do_http_progress( const int state )
 				/* LEDOFF(); */
 				udelay( 25000 );
 			}
-
 			// wait 1 sec
 			udelay( 1000000 );
-
 			break;
 	}
-
 	return( 0 );
 }
