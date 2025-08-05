@@ -2,6 +2,7 @@
 #include "ipq40xx_api.h"
 #include "ipq40xx_cdp.h"
 #include <command.h>
+#include <../../../arch/arm/include/asm/mach-types.h>
 
 #define KB_SIZE 1024
 #define MB_SIZE (KB_SIZE * KB_SIZE)

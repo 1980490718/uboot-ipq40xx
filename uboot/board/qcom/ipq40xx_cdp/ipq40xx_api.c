@@ -2,6 +2,7 @@
 #include "ipq40xx_api.h"
 #include <mmc.h>
 #include "ipq40xx_cdp.h"
+#include <../../../arch/arm/include/asm/mach-types.h>
 
 #define BUFFERSIZE 2048
 #define CHECK_ADDR(addr, val) (*(volatile unsigned char *)(addr) == (val))
