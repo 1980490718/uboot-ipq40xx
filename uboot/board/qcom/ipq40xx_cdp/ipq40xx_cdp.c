@@ -147,11 +147,23 @@ board_ipq40xx_params_t *gboard_param = (board_ipq40xx_params_t *)0xbadb0ad;
 static board_ipq40xx_params_t *get_board_param(unsigned int machid)
 {
 	unsigned int index;
+	char *at_sign;
 
-	printf("machid : 0x%0x\n", machid);
+	printf("machid: 0x%0x\n", machid);
 	for (index = 0; index < NUM_IPQ40XX_BOARDS; index++) {
-		if (machid == board_params[index].machid)
+		if (machid == board_params[index].machid) {
+			// Print board type after machid
+			if (board_params[index].dtb_config_name[1] &&
+				strlen(board_params[index].dtb_config_name[1]) > 0) {
+				at_sign = strchr(board_params[index].dtb_config_name[1], '@');
+				if (at_sign != NULL) {
+					printf("board: %s\n", at_sign + 1);
+				} else {
+					printf("board: %s\n", board_params[index].dtb_config_name[1]);
+				}
+			}
 			return &board_params[index];
+		}
 	}
 	BUG_ON(index == NUM_IPQ40XX_BOARDS);
 	printf("cdp: Invalid machine id 0x%x\n", machid);
