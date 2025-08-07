@@ -487,8 +487,8 @@ void main_loop (void)
 	}
 	
 	if (counter > 2) {
-	
-		printf( "\nReset button was held for %d seconds\nHTTP server is starting for firmware update...\n", counter );
+		printf("\nReset button GPIO%d value: %d\n\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
+		printf( "Reset button was held for %d seconds\nHTTP server is starting for firmware update...\n", counter );
 	switch (gboard_param->machid) {
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 		gpio_set_value(GPIO_S1300_MESH_LED, 1);
@@ -511,10 +511,6 @@ void main_loop (void)
 
 		http_update = 1;
 		goto SKIPBOOT;
-
-	} else if ((counter <= 1) && (counter > 0)) {
-		printf( "\nCaution: reset button wasn't held long enough!\nContinuing normal boot...\n" );
-	} else {
 	}
 	if(gboard_param->machid==MACH_TYPE_IPQ40XX_AP_DK01_1_C2)
 		gpio_set_value(GPIO_AP1300_POWER_LED, 1);
