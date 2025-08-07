@@ -207,9 +207,27 @@ static void CS_change(int port_num, int cs_num, int enable)
 
 static void blsp_pin_config(unsigned int port_num, int cs_num)
 {
-        unsigned int gpio;
-	gpio = cs_gpio_array[port_num][cs_num];
+	unsigned int gpio = cs_gpio_array[port_num][cs_num];
 	/* configure CS */
+	/* Only SPI NOR Flash (CS0) */
+	if (gpio == QUP0_SPI_CS_0) {
+		printf("\nspi_nor: CS GPIO configured: port%d,cs%d, gpio%d\n", port_num, 0, QUP0_SPI_CS_0);
+	}
+
+	/* Dual Flash (SPI NOR + SPI NAND) */
+	else if (gpio == QUP0_SPI_CS_1_DK01 ||
+			gpio == QUP0_SPI_CS_1_DK01_AP1300 ||
+			gpio == QUP0_SPI_CS_1_DK01_AP4220 ||
+			gpio == QUP0_SPI_CS_1_DK04) {
+		printf("\nspi_nor: CS GPIO configured: port%d, cs%d, gpio%d\n", port_num, 0, QUP0_SPI_CS_0);
+		printf("spi_nand: CS GPIO configured: port%d, cs%d, gpio%d\n", port_num, cs_num, gpio);
+	}
+
+	/* Other Flash (e.g., NAND-only) */
+	else {
+		printf("\nnand: CS GPIO configured: port%d, cs%d, gpio%d\n", port_num, cs_num, gpio);
+	}
+
 	gpio_tlmm_config(gpio, FUNC_SEL_GPIO, GPIO_OUTPUT, GPIO_PULL_UP,
 			GPIO_DRV_STR_10MA, GPIO_FUNC_ENABLE, 0, 0, 0);
 }
@@ -354,7 +372,6 @@ struct spi_slave *spi_setup_slave(unsigned int bus, unsigned int cs,
 		blsp_pin_config(ds->slave.bus, ds->slave.cs);
 		CS_change(ds->slave.bus, ds->slave.cs, CS_DEASSERT);
 	}
-
 	return &ds->slave;
 err:
 	free(ds);
