@@ -425,9 +425,9 @@ void main_loop (void)
 	default:
 		break;
 	}
-
+	printf("\nReset button GPIO%d initial value: %d\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
 	if (gpio_get_value(gpio_reset_btn) == GPIO_VAL_BTN_PRESSED) {
-		printf( "\nPress reset button for at least 3 seconds to enter web failsafe mode\n" );
+		printf( "Press reset button for at least 3 seconds to enter web failsafe mode\n" );
 		printf( "Reset button held for: %2d second(s)", counter);
 	}
 	while (gpio_get_value(gpio_reset_btn) == GPIO_VAL_BTN_PRESSED) {
@@ -487,7 +487,7 @@ void main_loop (void)
 	}
 	
 	if (counter > 2) {
-		printf("\nReset button GPIO%d value: %d\n\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
+		//printf("\nReset button GPIO%d value: %d\n\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
 		printf( "Reset button was held for %d seconds\nHTTP server is starting for firmware update...\n", counter );
 	switch (gboard_param->machid) {
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
