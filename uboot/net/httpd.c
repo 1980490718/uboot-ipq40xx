@@ -75,6 +75,9 @@ int do_http_upgrade( const ulong size, const int upgrade_type ) {
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 				case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+				case MACH_TYPE_IPQ40XX_DB_DK01_1_C1:
+				case MACH_TYPE_IPQ40XX_DB_DK02_1_C1:
+				case MACH_TYPE_IPQ40XX_TB832:
 					if(size > openwrt_firmware_size){
 						printf("Firmware oversize! Not flashing.\n");
 						return 0;
@@ -83,6 +86,8 @@ int do_http_upgrade( const ulong size, const int upgrade_type ) {
 						openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start, size);
 					break;
 				case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+				case MACH_TYPE_IPQ40XX_AP_DK04_1_C5:
+				case MACH_TYPE_IPQ40XX_AP_DK05_1_C1:
 				case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 					sprintf(cmd, "nand device 1 && nand erase 0x%x 0x%x && nand write 0x88000000 0x%x 0x%lx",
 						openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start, size);

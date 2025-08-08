@@ -69,7 +69,6 @@
 #endif
 
 #if defined(IPQ40XX_FOGPOD502)
-#define GPIO_FOGPOD502_POWER_LED	57
 #ifdef CONFIG_ALT_BANNER
 #define CONFIG_MODEL_NAME			"RyaTek FogPOD502/thinkplus FogPOD502"
 #endif

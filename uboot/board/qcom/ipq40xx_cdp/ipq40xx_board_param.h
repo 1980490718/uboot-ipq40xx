@@ -726,7 +726,7 @@ gpio_func_data_t rgmii_gpio_cfg[] = {
 		.gpio_pu_res = GPIO_PULL_RES0
 	},
 };
-
+#if defined(IPQ40XX_B2200)
 gpio_func_data_t ap_dk04_1_c3_sw_gpio_bga[] = {
 	{
 		.gpio = 6,
@@ -798,9 +798,8 @@ gpio_func_data_t ap_dk04_1_c3_sw_gpio_bga[] = {
 		.gpio_od_en = GPIO_OD_DISABLE,
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
-
 };
-
+#endif
 gpio_func_data_t sw_gpio_bga[] = { //s1300 ap_dk04.1-c1
 	{
 		.gpio = 6,
@@ -844,6 +843,7 @@ gpio_func_data_t sw_gpio_bga[] = { //s1300 ap_dk04.1-c1
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 	/*S1300 gpio led status, set by writel(GPIO_OUT, GPIO_IN_OUT_ADDR(2)); */
+#if defined(IPQ40XX_S1300)
 	{
 		.gpio = 60, //wifi
 		.func = 0,
@@ -874,7 +874,7 @@ gpio_func_data_t sw_gpio_bga[] = { //s1300 ap_dk04.1-c1
 		.gpio_od_en = GPIO_OD_DISABLE,
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
-
+#endif
 };
 
 gpio_func_data_t ap_dk04_1_c2_sw_gpio_bga[] = {
@@ -997,6 +997,7 @@ gpio_func_data_t ap_dk07_1_c1_sw_gpio_bga[] = {
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 	/*S1300-dk07 based: gpio led status, set by writel(GPIO_OUT, GPIO_IN_OUT_ADDR(2)); */
+#if defined(IPQ40XX_S1300)
 	{
 		.gpio = 60, //wifi
 		.func = 0,
@@ -1027,6 +1028,7 @@ gpio_func_data_t ap_dk07_1_c1_sw_gpio_bga[] = {
 		.gpio_od_en = GPIO_OD_DISABLE,
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
+#endif
 };
 
 gpio_func_data_t db_dk_2_1_sw_gpio_bga[] = {
@@ -1105,13 +1107,8 @@ gpio_func_data_t sw_gpio_qfn[] = {
 		.gpio_od_en = GPIO_OD_DISABLE,
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
-#endif
 	{
-#if defined(IPQ40XX_B1300)
 		.gpio = 4, //power
-#else
-		.gpio = 3, //power
-#endif
 		.func = 0,
 		.pull = GPIO_NO_PULL,
 		.drvstr = GPIO_2MA,
@@ -1120,6 +1117,7 @@ gpio_func_data_t sw_gpio_qfn[] = {
 		.gpio_od_en = GPIO_OD_DISABLE,
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
+#endif
 };
 
 gpio_func_data_t ap_dk01_1_c2_sw_gpio_qfn[] = {
@@ -1154,6 +1152,7 @@ gpio_func_data_t ap_dk01_1_c2_sw_gpio_qfn[] = {
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 	/*ap1300 gpio led status, set by writel(GPIO_OUT, GPIO_IN_OUT_ADDR(2)); */
+#if defined(IPQ40XX_AP1300)
 	{
 		.gpio = 0, //analogue switch
 		.func = 0,
@@ -1204,6 +1203,7 @@ gpio_func_data_t ap_dk01_1_c2_sw_gpio_qfn[] = {
 		.gpio_od_en = GPIO_OD_DISABLE,
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
+#endif
 };
 
 gpio_func_data_t ap_dk01_ap4220_sw_gpio_qfn[] = {
@@ -1643,7 +1643,11 @@ board_ipq40xx_params_t board_params[] = {
 		.mmc_gpio_count = ARRAY_SIZE(mmc_ap_dk04),
 		.spi_nand_available = 0,
 		.nor_nand_available = 0,
+#if defined(IPQ40XX_S1300)
 		.nor_emmc_available = 1,
+#else
+		.nor_emmc_available = 0,
+#endif
 #ifdef CONFIG_IPQ40XX_PCI
 		.pcie_cfg = {
 			pcie_board_cfg(0),
@@ -1715,25 +1719,33 @@ board_ipq40xx_params_t board_params[] = {
 		.spi_nor_gpio_count = ARRAY_SIZE(spi_nor_bga),
 		.nand_gpio = nand_gpio_bga,
 		.nand_gpio_count = ARRAY_SIZE(nand_gpio_bga),
+#if defined(IPQ40XX_B2200)
 		.sw_gpio = ap_dk04_1_c3_sw_gpio_bga,
+#else
+		.sw_gpio = sw_gpio_bga,
+#endif
 		.sw_gpio_count = ARRAY_SIZE(sw_gpio_bga),
 		.edma_cfg = {
 			ipq40xx_edma_cfg(0, 5, PSGMII,
 					0, 1, 2, 3, 4)
 		},
+#if defined(IPQ40XX_B2200)
 		.uart_cfg = &uart2,
 #ifdef CONFIG_IPQ40XX_I2C
 		.i2c_cfg = &i2c0,
+#endif
 #endif
 		.mmc_gpio = mmc_ap_dk04,
 		.mmc_gpio_count = ARRAY_SIZE(mmc_ap_dk04),
 		.spi_nand_available = 0,
 		.nor_nand_available = 0,
 		.nor_emmc_available = 1,
+#if defined(IPQ40XX_B2200)
 #ifdef CONFIG_IPQ40XX_PCI
 		.pcie_cfg = {
 			pcie_board_cfg(0),
 		},
+#endif
 #endif
 		.dtb_config_name = { "config@3", "config@ap.dk04.1-c3" },
 	},

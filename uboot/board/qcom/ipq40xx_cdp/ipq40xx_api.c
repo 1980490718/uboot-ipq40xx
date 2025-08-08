@@ -55,6 +55,9 @@ int upgrade(void) {
 			}
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+		case MACH_TYPE_IPQ40XX_DB_DK01_1_C1:
+		case MACH_TYPE_IPQ40XX_DB_DK02_1_C1:
+		case MACH_TYPE_IPQ40XX_TB832:
 			if (file_size >= openwrt_firmware_size) {
 				printf("Firmware too large! Not flashing.\n");
 				return 0;
@@ -64,6 +67,8 @@ int upgrade(void) {
 				openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start);
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C5:
+		case MACH_TYPE_IPQ40XX_AP_DK05_1_C1:
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 			snprintf(cmd, sizeof(cmd),
 				"nand device 1 && nand erase 0x%x 0x%x && nand write 0x88000000 0x%x $filesize",
