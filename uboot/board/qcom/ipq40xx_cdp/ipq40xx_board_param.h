@@ -1868,6 +1868,32 @@ board_ipq40xx_params_t board_params[] = {
 		.dtb_config_name = { "config@13", "config@ap.dk07.1-c2" },
 	},
 	{
+		.machid = MACH_TYPE_IPQ40XX_AP_DK07_1_C3,
+		.ddr_size = (512 << 20),
+		.console_uart_cfg = &uart1_console_uart_dk04,
+		.mtdids = "nand0=nand0",
+		.nand_gpio = nand_gpio_dk07,
+		.nand_gpio_count = ARRAY_SIZE(nand_gpio_dk07),
+		.sw_gpio = ap_dk07_1_c1_sw_gpio_bga,
+		.sw_gpio_count = ARRAY_SIZE(ap_dk07_1_c1_sw_gpio_bga),
+		.edma_cfg = {
+			ipq40xx_edma_cfg(0, 5, PSGMII,
+			0, 1, 2, 3, 4)
+			},
+#ifdef CONFIG_IPQ40XX_I2C
+		.i2c_cfg = &i2c0,
+#endif
+		.spi_nand_available = 0,
+		.nor_nand_available = 0,
+		.nor_emmc_available = 0,
+#ifdef CONFIG_IPQ40XX_PCI
+		.pcie_cfg = {
+			pcie_board_cfg_dk07(0),
+		},
+#endif
+		.dtb_config_name = { "config@14", "config@ap.dk07.1-c3" },
+	},
+	{
 		.machid = MACH_TYPE_IPQ40XX_DB_DK01_1_C1,
 		.ddr_size = (256 << 20),
 		.mtdids = "nand2=spi0.0",
