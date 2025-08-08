@@ -91,22 +91,12 @@ void gpio_set_value(unsigned int gpio, unsigned int out)
 	writel(val, addr);
 }
 
-/*@by luoyejiang*/
 int gpio_get_value(unsigned int gpio)
 {
-	unsigned int *addr = NULL;
-	unsigned int val = 0;
-	addr = (unsigned int *)GPIO_IN_OUT_ADDR(gpio);
-
-	val = readl(addr);
-	return val;
+	return readl((unsigned int *)GPIO_IN_OUT_ADDR(gpio));
 }
 
 void gpio_twinkle_value(unsigned int gpio_type)
 {
-	if (gpio_get_value(gpio_type) == 0) {
-		gpio_set_value(gpio_type, 1);
-	} else {
-		gpio_set_value(gpio_type, 0);
-	}
+	gpio_set_value(gpio_type, !gpio_get_value(gpio_type));
 }
