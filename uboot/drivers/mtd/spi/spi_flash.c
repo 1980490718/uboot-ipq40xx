@@ -280,7 +280,7 @@ static int spi_flash_cmd_erase_block_or_sector(struct spi_flash *flash, u8 erase
 		return ret;
 	}
 	//b1300 s1300 turn off mesh led when  flash erase
-#if defined(B1300) || defined(s1300)
+#if defined(IPQ40XX_B1300) || defined(IPQ40XX_S1300)
 	if(led_upgrade_write_flashing_1 != led_upgrade_write_flashing_2)
 		gpio_set_value(led_upgrade_write_flashing_1, LED_OFF);
 #endif
