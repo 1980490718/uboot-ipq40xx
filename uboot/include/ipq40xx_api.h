@@ -34,7 +34,9 @@
 #define GPIO_VAL_BTN_PRESSED	0
 #define LED_ON	1
 #define LED_OFF 0
-
+#if defined(IPQ40XX_FOGPOD502)
+#define GPIO_FOGPOD502_POWER_LED 57
+#endif
 // U-Boot partition size and offset
 #define WEBFAILSAFE_UPLOAD_UBOOT_ADDRESS		0x88000000
 #define UPDATE_SCRIPT_UBOOT_SIZE_IN_BYTES		"0x80000"
@@ -66,23 +68,30 @@
 #define CONFIG_NET_MULTI
 
 
-
+#if defined(IPQ40XX_AP1300)
 #define GPIO_AP1300_POWER_LED 2
 #define GPIO_AP1300_INET_LED 3
+#endif
 
+#if defined(IPQ40XX_S1300)
 #define GPIO_S1300_POWER_LED 57
 #define GPIO_S1300_MESH_LED 59
 #define GPIO_S1300_WIFI_LED 60
+#endif
 
+#if defined(IPQ40XX_B2200)
 //NB: b2200 white led active low
 #define GPIO_B2200_POWER_WHITE_LED 61 //active low
 #define GPIO_B2200_POWER_BLUE_LED 57
 #define GPIO_B2200_INET_WHITE_LED 66 //active low
 #define GPIO_B2200_INET_BLUE_LED 60
+#endif
 
+#if defined(IPQ40XX_B1300)
 #define GPIO_B1300_POWER_LED 4
 #define GPIO_B1300_MESH_LED 3
 #define GPIO_B1300_WIFI_LED 2
+#endif
 
 #define FW_TYPE_QSDK 0
 #define FW_TYPE_OPENWRT 1

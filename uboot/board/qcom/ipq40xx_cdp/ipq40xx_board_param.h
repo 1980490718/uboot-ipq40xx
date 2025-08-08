@@ -833,16 +833,16 @@ gpio_func_data_t sw_gpio_bga[] = { //s1300 ap_dk04.1-c1
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 	{
-                /* overriding the default configuration of gpio52 */
-                .gpio = 52,
-                .func = 0,
-                .pull = GPIO_PULL_UP,
-                .drvstr = GPIO_2MA,
-                .oe = GPIO_OE_DISABLE,
-                .gpio_vm = GPIO_VM_ENABLE,
-                .gpio_od_en = GPIO_OD_DISABLE,
-                .gpio_pu_res = GPIO_PULL_RES2
-        },
+		/* overriding the default configuration of gpio52 */
+		.gpio = 52,
+		.func = 0,
+		.pull = GPIO_PULL_UP,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_DISABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
 	/*S1300 gpio led status, set by writel(GPIO_OUT, GPIO_IN_OUT_ADDR(2)); */
 	{
 		.gpio = 60, //wifi
@@ -1084,6 +1084,7 @@ gpio_func_data_t sw_gpio_qfn[] = {
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 	/*B1300 gpio led status, set by writel(GPIO_OUT, GPIO_IN_OUT_ADDR(2)); */
+#if defined(IPQ40XX_B1300)
 	{
 		.gpio = 2, //wifi
 		.func = 0,
@@ -1104,8 +1105,13 @@ gpio_func_data_t sw_gpio_qfn[] = {
 		.gpio_od_en = GPIO_OD_DISABLE,
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
+#endif
 	{
+#if defined(IPQ40XX_B1300)
 		.gpio = 4, //power
+#else
+		.gpio = 3, //power
+#endif
 		.func = 0,
 		.pull = GPIO_NO_PULL,
 		.drvstr = GPIO_2MA,

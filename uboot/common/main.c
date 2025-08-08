@@ -420,11 +420,16 @@ void main_loop (void)
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
+#if defined(IPQ40XX_FOGPOD502)
+		gpio_reset_btn=4;
+#else
 		gpio_reset_btn=63;
+#endif
 		break;
 	default:
 		break;
 	}
+
 	printf("\nReset button GPIO%d initial value: %d\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
 	if (gpio_get_value(gpio_reset_btn) == GPIO_VAL_BTN_PRESSED) {
 		printf( "Press reset button for at least 3 seconds to enter web failsafe mode\n" );
@@ -434,16 +439,24 @@ void main_loop (void)
 
 		switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+#if defined(IPQ40XX_S1300)
 			gpio_set_value(GPIO_S1300_WIFI_LED, 1);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+#if defined(IPQ40XX_B2200)
 			gpio_set_value(GPIO_B2200_POWER_WHITE_LED, 0);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+#if defined(IPQ40XX_B1300)
 			gpio_set_value(GPIO_B1300_WIFI_LED, 1);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+#if defined(IPQ40XX_AP1300)
 			gpio_set_value(GPIO_AP1300_POWER_LED, 1);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 			gpio_set_value(GPIO_AP4220_POWER_LED, 1);
@@ -455,16 +468,24 @@ void main_loop (void)
 	
 		switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+#if defined(IPQ40XX_S1300)
 			gpio_set_value(GPIO_S1300_WIFI_LED, 0);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+#if defined(IPQ40XX_B2200)
 			gpio_set_value(GPIO_B2200_POWER_WHITE_LED, 1);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+#if defined(IPQ40XX_B1300)
 			gpio_set_value(GPIO_B1300_WIFI_LED, 0);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+#if defined(IPQ40XX_AP1300)
 			gpio_set_value(GPIO_AP1300_POWER_LED, 0);
+#endif
 			break;
 		default:
 			break;
@@ -487,20 +508,29 @@ void main_loop (void)
 	}
 	
 	if (counter > 2) {
+
 		//printf("\nReset button GPIO%d value: %d\n\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
 		printf( "Reset button was held for %d seconds\nHTTP server is starting for firmware update...\n", counter );
 	switch (gboard_param->machid) {
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+#if defined(IPQ40XX_S1300)
 		gpio_set_value(GPIO_S1300_MESH_LED, 1);
+#endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+#if defined(IPQ40XX_B2200)
 		gpio_set_value(GPIO_B2200_POWER_WHITE_LED, 0);
+#endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+#if defined(IPQ40XX_B1300)
 		gpio_set_value(GPIO_B1300_MESH_LED, 1);
+#endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+#if defined(IPQ40XX_AP1300)
 		gpio_set_value(GPIO_AP1300_POWER_LED, 1);
+#endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 		gpio_set_value(GPIO_AP4220_POWER_LED, 1);
@@ -511,9 +541,12 @@ void main_loop (void)
 
 		http_update = 1;
 		goto SKIPBOOT;
+
 	}
+#if defined(IPQ40XX_AP1300)
 	if(gboard_param->machid==MACH_TYPE_IPQ40XX_AP_DK01_1_C2)
 		gpio_set_value(GPIO_AP1300_POWER_LED, 1);
+#endif
 # endif
 	if (bootdelay >= 0 && s && !abortboot (bootdelay)) {
 # ifdef CONFIG_AUTOBOOT_KEYED

@@ -75,12 +75,16 @@ int upgrade(void) {
 void LED_INIT(void) {
 	switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+#if defined(IPQ40XX_B1300)
 			gpio_set_value(GPIO_B1300_MESH_LED, 0);
 			gpio_set_value(GPIO_B1300_WIFI_LED, 0);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+#if defined(IPQ40XX_AP1300)
 			gpio_set_value(GPIO_AP1300_POWER_LED, 1);
 			gpio_set_value(GPIO_AP1300_INET_LED, 0);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 			gpio_set_value(GPIO_AP4220_POWER_LED, 0);
@@ -88,14 +92,18 @@ void LED_INIT(void) {
 			gpio_set_value(GPIO_AP4220_5GWIFI_LED, 0);
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+#if defined(IPQ40XX_S1300)
 			gpio_set_value(GPIO_S1300_MESH_LED, 0);
 			gpio_set_value(GPIO_S1300_WIFI_LED, 0);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+#if defined(IPQ40XX_B2200)
 			gpio_set_value(GPIO_B2200_INET_WHITE_LED, 1);
 			gpio_set_value(GPIO_B2200_INET_BLUE_LED, 0);
 			gpio_set_value(GPIO_B2200_POWER_BLUE_LED, 1);
 			gpio_set_value(GPIO_B2200_POWER_WHITE_LED, 1);
+#endif
 			break;
 		default:
 			break;
@@ -104,8 +112,10 @@ void LED_INIT(void) {
 void LED_BOOTING(void) {
 	switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+#if defined(IPQ40XX_AP1300)
 			gpio_set_value(GPIO_AP1300_POWER_LED, 1);
 			gpio_set_value(GPIO_AP1300_INET_LED, 0);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 			gpio_set_value(GPIO_AP4220_POWER_LED, 0);
@@ -135,33 +145,39 @@ void board_names_init()
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 		openwrt_firmware_start=0x180000;
 		openwrt_firmware_size=0xe80000;
+#if defined(IPQ40XX_S1300)
 		power_led=GPIO_S1300_POWER_LED;
 		led_tftp_transfer_flashing=GPIO_S1300_MESH_LED;
 		led_upgrade_write_flashing_1=GPIO_S1300_MESH_LED;
 		led_upgrade_write_flashing_2=GPIO_S1300_WIFI_LED;
 		led_upgrade_erase_flashing=GPIO_S1300_WIFI_LED;
+#endif
 		get_mmc_part_info();
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 		openwrt_firmware_start=0x180000;
 		openwrt_firmware_size=0xe80000;
+#if defined(IPQ40XX_B2200)
 		power_led=GPIO_B2200_POWER_BLUE_LED;
 		led_tftp_transfer_flashing=GPIO_B2200_POWER_BLUE_LED;
 		led_upgrade_write_flashing_1=GPIO_B2200_POWER_BLUE_LED;
 		led_upgrade_write_flashing_2=GPIO_B2200_POWER_BLUE_LED;
 		led_upgrade_erase_flashing=GPIO_B2200_POWER_BLUE_LED;
 		power_led_active_low=0;
+#endif
 		get_mmc_part_info();
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 		openwrt_firmware_start=0x0;
 		openwrt_firmware_size=0x8000000;
+#if defined(IPQ40XX_AP1300)
 		power_led=GPIO_AP1300_POWER_LED;
 		led_tftp_transfer_flashing=GPIO_AP1300_POWER_LED;
 		led_upgrade_write_flashing_1=GPIO_AP1300_POWER_LED;
 		led_upgrade_write_flashing_2=GPIO_AP1300_POWER_LED;
 		led_upgrade_erase_flashing=GPIO_AP1300_POWER_LED;
 		flashing_power_led=1;
+#endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 		openwrt_firmware_start=0x0;
@@ -176,11 +192,13 @@ void board_names_init()
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
 		openwrt_firmware_start=0x180000;
 		openwrt_firmware_size=0x1e80000;
+#if defined(IPQ40XX_B1300)
 		power_led=GPIO_B1300_POWER_LED;
 		led_tftp_transfer_flashing=GPIO_B1300_MESH_LED;
 		led_upgrade_write_flashing_1=GPIO_B1300_MESH_LED;
 		led_upgrade_write_flashing_2=GPIO_B1300_WIFI_LED;
 		led_upgrade_erase_flashing=GPIO_B1300_WIFI_LED;
+#endif
 		break;
 	default:
 		break;

@@ -47,7 +47,7 @@ DECLARE_GLOBAL_DATA_PTR;
  */
 static unsigned int cs_gpio_array_dk01[NUM_PORTS][NUM_CS] = {
 	{
-		QUP0_SPI_CS_0, QUP0_SPI_CS_1_DK01_AP1300,
+		QUP0_SPI_CS_0, QUP0_SPI_CS_1_DK01,
 	},
 };
 
@@ -216,7 +216,6 @@ static void blsp_pin_config(unsigned int port_num, int cs_num)
 
 	/* Dual Flash (SPI NOR + SPI NAND) */
 	else if (gpio == QUP0_SPI_CS_1_DK01 ||
-			gpio == QUP0_SPI_CS_1_DK01_AP1300 ||
 			gpio == QUP0_SPI_CS_1_DK01_AP4220 ||
 			gpio == QUP0_SPI_CS_1_DK04) {
 		printf("\nspi_nor: CS GPIO configured: port%d, cs%d, gpio%d\n", port_num, 0, QUP0_SPI_CS_0);

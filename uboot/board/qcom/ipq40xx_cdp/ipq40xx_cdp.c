@@ -599,11 +599,13 @@ void light_all_led(unsigned int machid)
 {
 	switch (machid) {
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+#if defined(IPQ40XX_AP1300)
 		mdelay(1);
 		writel(GPIO_OUT, GPIO_IN_OUT_ADDR(GPIO_AP1300_POWER_LED));
 		mdelay(1);
 		writel(GPIO_OUT, GPIO_IN_OUT_ADDR(GPIO_AP1300_INET_LED));
 		mdelay(1);
+#endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 		mdelay(1);
@@ -615,6 +617,7 @@ void light_all_led(unsigned int machid)
 		mdelay(1);
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+#if defined(IPQ40XX_B1300)
 		mdelay(1);
 		writel(GPIO_OUT, GPIO_IN_OUT_ADDR(GPIO_B1300_POWER_LED));
 		mdelay(1);
@@ -622,8 +625,10 @@ void light_all_led(unsigned int machid)
 		mdelay(1);
 		writel(GPIO_OUT, GPIO_IN_OUT_ADDR(GPIO_B1300_WIFI_LED));
 		mdelay(1);
+#endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+#if defined(IPQ40XX_S1300)
 		mdelay(1);
 		writel(GPIO_OUT, GPIO_IN_OUT_ADDR(GPIO_S1300_POWER_LED));
 		mdelay(1);
@@ -631,8 +636,10 @@ void light_all_led(unsigned int machid)
 		mdelay(1);
 		writel(GPIO_OUT, GPIO_IN_OUT_ADDR(GPIO_S1300_WIFI_LED));
 		mdelay(1);
+#endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+#if defined(IPQ40XX_B2200)
 		mdelay(1);
 		//b2200 white led active low
 		writel(GPIO_IN, GPIO_IN_OUT_ADDR(GPIO_B2200_POWER_WHITE_LED));
@@ -644,6 +651,7 @@ void light_all_led(unsigned int machid)
 		mdelay(1);
 		writel(GPIO_OUT, GPIO_IN_OUT_ADDR(GPIO_B2200_INET_BLUE_LED));
 		mdelay(1);
+#endif
 		break;
 	default:
 		break;
