@@ -8,4 +8,8 @@
 #include <configs/ipq40xx_cdp.h>
 #include <ipq40xx_api.h>
 
+/* Print the current model */
+#define CONFIG_ALT_BANNER          1
+#define CONFIG_MODEL_NAME	"RyaTek FogPOD502/thinkplus FogPOD502"
+
 #endif /* _IPQ40XX_FOGPOD502_H */

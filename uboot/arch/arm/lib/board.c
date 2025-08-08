@@ -124,7 +124,12 @@ static int init_baudrate(void)
 
 static int display_banner(void)
 {
+#if defined(CONFIG_ALT_BANNER)
+	printf("\n%s\n\n", version_string);
+	printf("Model: %s\n", CONFIG_MODEL_NAME);
+#else
 	printf("\n\n%s\n\n", version_string);
+#endif
 	debug("U-Boot code: %08lX -> %08lX  BSS: -> %08lX\n",
 	       _TEXT_BASE,
 	       _bss_start_ofs + _TEXT_BASE, _bss_end_ofs + _TEXT_BASE);

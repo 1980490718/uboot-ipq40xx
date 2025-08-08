@@ -320,5 +320,4 @@ typedef struct {
 #define CONFIG_IPQ_FDT_HIGH	0x87000000
 
 #define CONFIG_HTTPD
-
 #endif /* _IPQCDP_H */

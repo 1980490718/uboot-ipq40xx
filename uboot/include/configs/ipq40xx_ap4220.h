@@ -8,6 +8,10 @@
 #include <configs/ipq40xx_cdp.h>
 #include <ipq40xx_api.h>
 
+/* Print the current model */
+#define CONFIG_ALT_BANNER          1
+#define CONFIG_MODEL_NAME	"Aliyun AP4220"
+
 #define CONFIG_EXTRA_ENV_SETTINGS \
 	"active=1\0" \
 	"altbootcmd=if test $changed = 0; then run do_change; else run do_recovery; fi\0" \
