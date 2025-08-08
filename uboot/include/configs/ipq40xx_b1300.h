@@ -5,11 +5,10 @@
 #ifndef _IPQ40XX_B1300_H
 #define _IPQ40XX_B1300_H
 #define IPQ40XX_B1300 1
+#define CONFIG_ALT_BANNER          1 /* Print the current model */
+
 #include <configs/ipq40xx_cdp.h>
 #include <ipq40xx_api.h>
 
-/* Print the current model */
-#define CONFIG_ALT_BANNER          1
-#define CONFIG_MODEL_NAME	"GL.iNet GL-B1300"
 
 #endif /* _IPQ40XX_B1300_H */

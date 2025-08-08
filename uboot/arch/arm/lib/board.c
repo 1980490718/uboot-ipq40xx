@@ -52,6 +52,7 @@
 #include <fdtdec.h>
 #include <post.h>
 #include <logbuff.h>
+#include <ipq40xx_api.h>
 
 #ifdef CONFIG_BITBANGMII
 #include <miiphy.h>
