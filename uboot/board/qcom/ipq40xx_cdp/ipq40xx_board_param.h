@@ -822,7 +822,11 @@ gpio_func_data_t sw_gpio_bga[] = { //s1300 ap_dk04.1-c1
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 	{
+#if defined(IPQ40XX_S1300)
 		.gpio = 41,
+#else
+		.gpio = 47,
+#endif
 		.func = 0,
 		.pull = GPIO_PULL_DOWN,
 		.drvstr = GPIO_2MA,
