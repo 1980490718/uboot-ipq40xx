@@ -75,6 +75,15 @@ static inline void set_cr(unsigned int val)
 	isb();
 }
 
+#ifdef CONFIG_IPQ40XX
+static inline void set_dacr(unsigned int val)
+{
+	asm volatile("mcr p15, 0, %0, c3, c0, 0	@ set DACR"
+	  : : "r" (val) : "cc");
+	isb();
+}
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 #define arch_align_stack(x) (x)

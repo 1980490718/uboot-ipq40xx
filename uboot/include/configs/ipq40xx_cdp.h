@@ -94,6 +94,19 @@
 #define CONFIG_OF_LIBFDT		1
 #define CONFIG_OF_BOARD_SETUP		1
 
+/*
+ * IPQ_TFTP_MAX_ADDR: Starting address of UBoot load/Execution region.
+ * TFTP file can be written upto IPQ_TFTP_MAX_ADDR.
+ */
+#define IPQ_TFTP_MAX_ADDR		0x87000000
+//#define CONFIG_IPQ40XX_I2C
+/*
+ * CONFIG_TZ_END_ADDR: Ending address of Trust Zone.
+ * TFTP file can also be written from CONFIG_TZ_END_ADDR
+ * to CONFIG_SYS_SDRAM_END.
+ */
+#define CONFIG_TZ_END_ADDR		0x88000000
+#define CONFIG_SYS_SDRAM_END		(CONFIG_SYS_SDRAM_BASE + gd->ram_size)
 //#define CONFIG_IPQ40XX_I2C
 #ifdef CONFIG_IPQ40XX_I2C
 #define CONFIG_CMD_I2C

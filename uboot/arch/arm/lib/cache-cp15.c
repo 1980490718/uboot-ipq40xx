@@ -32,6 +32,12 @@
 #define CACHE_SETUP	0x1e
 #endif
 
+
+#ifdef CONFIG_IPQ40XX
+#define GEN_CACHE_SETUP		0x101e
+#define UBOOT_CACHE_SETUP	0x100e
+#endif
+
 DECLARE_GLOBAL_DATA_PTR;
 
 void __arm_init_before_mmu(void)
@@ -50,6 +56,52 @@ static void cp_delay (void)
 	asm volatile("" : : : "memory");
 }
 
+#ifdef CONFIG_IPQ40XX
+static inline void dram_bank_mmu_setup(int bank)
+{
+	u32 *page_table = (u32 *)gd->tlb_addr;
+	bd_t *bd = gd->bd;
+	int	i;
+
+	debug("%s: bank: %d\n", __func__, bank);
+	for (i = bd->bi_dram[bank].start >> 20;
+	     i < (bd->bi_dram[bank].start + bd->bi_dram[bank].size) >> 20;
+	     i++) {
+		/* Set XN bit for all dram regions except uboot code region */
+		if (i >= (CONFIG_SYS_TEXT_BASE >> 20) && i < ((CONFIG_SYS_TEXT_BASE + 0x100000) >> 20))
+			page_table[i] = i << 20 | (3 << 10) | UBOOT_CACHE_SETUP;
+		else
+			page_table[i] = i << 20 | (3 << 10) | GEN_CACHE_SETUP;
+	}
+}
+
+/* to activate the MMU we need to set up virtual memory: use 1M areas */
+static inline void mmu_setup(void)
+{
+	u32 *page_table = (u32 *)gd->tlb_addr;
+	int i;
+	u32 reg;
+
+	arm_init_before_mmu();
+	/* Set up an identity-mapping for all 4GB, rw for everyone */
+	for (i = 0; i < 4096; i++)
+		page_table[i] = i << 20 | (3 << 10) | 0x16;
+
+	for (i = 0; i < CONFIG_NR_DRAM_BANKS; i++) {
+		dram_bank_mmu_setup(i);
+	}
+
+	/* Copy the page table address to cp15 */
+	asm volatile("mcr p15, 0, %0, c2, c0, 0"
+		     : : "r" (page_table) : "memory");
+	/* Set access control as all clients */
+	set_dacr(0x55555555);
+	/* and enable the mmu */
+	reg = get_cr();	/* get control reg. */
+	cp_delay();
+	set_cr(reg | CR_M);
+}
+#else
 static inline void dram_bank_mmu_setup(int bank)
 {
 	u32 *page_table = (u32 *)gd->tlb_addr;
@@ -91,6 +143,7 @@ static inline void mmu_setup(void)
 	cp_delay();
 	set_cr(reg | CR_M);
 }
+#endif
 
 static int mmu_enabled(void)
 {
