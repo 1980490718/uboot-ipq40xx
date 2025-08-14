@@ -36,8 +36,8 @@ host_util/lzma/lzma
 /u-boot/bootstrap
 /u-boot/bootstrap.map
 
-# MD5 in bin
-/bin/*.md5
+# bin folder
+/bin/
 
 # Symbolic links and some compilation results from tools
 /u-boot/tools/crc32.c
