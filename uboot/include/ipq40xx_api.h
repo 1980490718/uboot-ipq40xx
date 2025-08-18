@@ -59,6 +59,18 @@
 #define LED_OFF						0
 
 // Device-specific GPIO configurations
+#if defined(IPQ40XX_AC58U)
+#ifdef CONFIG_ALT_BANNER
+#define CONFIG_MODEL_NAME			"ASUS RT-AC58U"
+#define GPIO_AC58U_POWER_LED		3
+#define GPIO_AC58U_WAN_LED			1
+#define GPIO_AC58U_2GWIFI_LED		58
+#define GPIO_AC58U_5GWIFI_LED		5
+#define GPIO_AC58U_USB_LED		    0
+#define GPIO_AC58U_LAN_LED		    2
+#endif
+#endif
+
 #define GPIO_AP4220_POWER_LED		5  // active low
 #define GPIO_AP4220_2GWIFI_LED		3
 #define GPIO_AP4220_5GWIFI_LED		2  // active low

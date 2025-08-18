@@ -93,8 +93,11 @@ static int set_fs_bootargs(int *fs_on_nand)
 {
 	char *bootargs;
 	unsigned int active_part = 0;
-
+#if defined(IPQ40XX_AC58U)
+#define nand_rootfs	"ubi.mtd=UBI_DEV "
+#else
 #define nand_rootfs	"ubi.mtd=" QCA_ROOT_FS_PART_NAME " root=mtd:ubi_rootfs rootfstype=squashfs"
+#endif
 
 	if (sfi->flash_type == SMEM_BOOT_SPI_FLASH) {
 		if (((sfi->rootfs.offset == 0xBAD0FF5E) &&

@@ -420,7 +420,7 @@ void main_loop (void)
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
-#if defined(IPQ40XX_FOGPOD502)
+#if defined(IPQ40XX_FOGPOD502) || defined(IPQ40XX_AC58U)
 		gpio_reset_btn=4;
 #else
 		gpio_reset_btn=63;
@@ -457,6 +457,9 @@ void main_loop (void)
 #if defined(IPQ40XX_AP1300)
 			gpio_set_value(GPIO_AP1300_POWER_LED, 1);
 #endif
+#if defined(IPQ40XX_AC58U)
+			gpio_set_value(GPIO_AC58U_POWER_LED, 1);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 			gpio_set_value(GPIO_AP4220_POWER_LED, 1);
@@ -485,6 +488,9 @@ void main_loop (void)
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 #if defined(IPQ40XX_AP1300)
 			gpio_set_value(GPIO_AP1300_POWER_LED, 0);
+#endif
+#if defined(IPQ40XX_AC58U)
+			gpio_set_value(GPIO_AC58U_POWER_LED, 0);
 #endif
 			break;
 		default:
@@ -530,6 +536,9 @@ void main_loop (void)
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 #if defined(IPQ40XX_AP1300)
 		gpio_set_value(GPIO_AP1300_POWER_LED, 1);
+#endif
+#if defined(IPQ40XX_AC58U)
+		gpio_set_value(GPIO_AC58U_POWER_LED, 1);
 #endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:

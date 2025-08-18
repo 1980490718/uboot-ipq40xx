@@ -90,6 +90,14 @@ void LED_INIT(void) {
 			gpio_set_value(GPIO_AP1300_POWER_LED, 1);
 			gpio_set_value(GPIO_AP1300_INET_LED, 0);
 #endif
+#if defined(IPQ40XX_AC58U)
+			gpio_set_value(GPIO_AC58U_POWER_LED, 0);
+			gpio_set_value(GPIO_AC58U_WAN_LED, 0);
+			gpio_set_value(GPIO_AC58U_2GWIFI_LED, 0);
+			gpio_set_value(GPIO_AC58U_5GWIFI_LED, 0);
+			gpio_set_value(GPIO_AC58U_USB_LED, 0);
+			gpio_set_value(GPIO_AC58U_LAN_LED, 0);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 			gpio_set_value(GPIO_AP4220_POWER_LED, 0);
@@ -120,6 +128,14 @@ void LED_BOOTING(void) {
 #if defined(IPQ40XX_AP1300)
 			gpio_set_value(GPIO_AP1300_POWER_LED, 1);
 			gpio_set_value(GPIO_AP1300_INET_LED, 0);
+#endif
+#if defined(IPQ40XX_AC58U)
+			gpio_set_value(GPIO_AC58U_POWER_LED, 1);
+			gpio_set_value(GPIO_AC58U_WAN_LED, 0);
+			gpio_set_value(GPIO_AC58U_2GWIFI_LED, 0);
+			gpio_set_value(GPIO_AC58U_5GWIFI_LED, 0);
+			gpio_set_value(GPIO_AC58U_USB_LED, 0);
+			gpio_set_value(GPIO_AC58U_LAN_LED, 0);
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
@@ -181,6 +197,14 @@ void board_names_init()
 		led_upgrade_write_flashing_1=GPIO_AP1300_POWER_LED;
 		led_upgrade_write_flashing_2=GPIO_AP1300_POWER_LED;
 		led_upgrade_erase_flashing=GPIO_AP1300_POWER_LED;
+		flashing_power_led=1;
+#endif
+#if defined(IPQ40XX_AC58U)
+		power_led=GPIO_AC58U_POWER_LED;
+		led_tftp_transfer_flashing=GPIO_AC58U_POWER_LED;
+		led_upgrade_write_flashing_1=GPIO_AC58U_WAN_LED;
+		led_upgrade_write_flashing_2=GPIO_AC58U_LAN_LED;
+		led_upgrade_erase_flashing=GPIO_AC58U_POWER_LED;
 		flashing_power_led=1;
 #endif
 		break;
