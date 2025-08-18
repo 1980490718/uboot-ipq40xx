@@ -76,7 +76,6 @@ int spi_flash_cmd_read(struct spi_slave *spi, const u8 *cmd,
 int spi_flash_cmd_write(struct spi_slave *spi, const u8 *cmd, size_t cmd_len,
 		const void *data, size_t data_len, int twinkle_led)
 {
-#if defined(IPQ40XX_B1300) || defined(IPQ40XX_S1300)
 	if ((spi_write_count % 500) == 0 && twinkle_led == 1) {
 		gpio_twinkle_value(led_upgrade_write_flashing_2);
 		if(led_upgrade_write_flashing_2 != led_upgrade_write_flashing_1)
@@ -85,7 +84,6 @@ int spi_flash_cmd_write(struct spi_slave *spi, const u8 *cmd, size_t cmd_len,
 	}
 
 	spi_write_count++;
-#endif
 	return spi_flash_read_write(spi, cmd, cmd_len, data, NULL, data_len);
 }
 
@@ -100,13 +98,11 @@ int spi_flash_cmd_write_multi(struct spi_flash *flash, u32 offset,
 	page_size = flash->page_size;
 	page_addr = offset / page_size;
 	byte_addr = offset % page_size;
-#if defined(IPQ40XX_B1300) || defined(IPQ40XX_S1300)
 	/*sync GPIO_2GWiFi_LED and GPIO_5GWiFi_LED*/
 	gpio_set_value(led_upgrade_write_flashing_1, LED_OFF);
 	gpio_set_value(led_upgrade_write_flashing_2, LED_OFF);
 	gpio_set_value(led_upgrade_erase_flashing, LED_OFF);
 	gpio_set_value(power_led, !power_led_active_low);
-#endif
 	ret = spi_claim_bus(flash->spi);
 	if (ret) {
 		debug("SF: unable to claim SPI bus\n");
