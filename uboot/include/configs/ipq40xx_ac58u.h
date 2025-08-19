@@ -4,8 +4,6 @@
 
 #ifndef _IPQ40XX_AC58U_H
 #define _IPQ40XX_AC58U_H
-#define IPQ40XX_AC58U       1
-#define CONFIG_ALT_BANNER   1 /* Print the current model */
 
 #define MTDIDS              "nand1=nand1"
 #define MTDPARTS            "mtdparts=nand1:-(UBI_DEV)"
