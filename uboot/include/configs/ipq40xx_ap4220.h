@@ -5,7 +5,6 @@
 #ifndef _IPQ40XX_AP4220_H
 #define _IPQ40XX_AP4220_H
 #define IPQ40XX_AP4220 1
-#define CONFIG_ALT_BANNER          1 /* Print the current model */
 
 #include <configs/ipq40xx_cdp.h>
 #include <ipq40xx_api.h>
