@@ -1,9 +1,12 @@
 #include <common.h>
 #include <command.h>
 #include <environment.h>
+#include <asm/global_data.h>
 #include <linux/string.h>
 #include <linux/ctype.h>
 #include <malloc.h>
+
+DECLARE_GLOBAL_DATA_PTR;
 
 struct env_entry {
 	char *name;
@@ -29,30 +32,44 @@ static void urldecode(char *dst, const char *src) {
 	*dst = '\0';
 }
 
+static int env_compare(const void *a, const void *b) {
+	const struct env_entry *entry_a = (const struct env_entry *)a;
+	const struct env_entry *entry_b = (const struct env_entry *)b;
+	return strcmp(entry_a->name, entry_b->name);
+}
+
 static int env_get_items(struct env_entry **entries, int *count) {
-	const char *env;
-	char *nxt;
+	if (!(gd->flags & GD_FLG_ENV_READY)) {
+		return -1;
+	}
+	ENTRY *ep;
 	int env_size = 0;
-	for (env = (const char *)env_get_addr(0); *env; env = nxt + 1) {
-		nxt = (char *)env + strlen(env);
-		if (strchr(env, '='))
-			env_size++;
+	int idx = 0;
+	while ((idx = hmatch_r("", idx, &ep, &env_htab))) {
+		env_size++;
 	}
 	struct env_entry *env_list = malloc(env_size * sizeof(struct env_entry));
 	if (!env_list)
 		return -1;
+	idx = 0;
 	int i = 0;
-	for (env = (const char *)env_get_addr(0); *env; env = nxt + 1) {
-		nxt = (char *)env + strlen(env);
-		char *eq = strchr((char *)env, '=');
-		if (eq) {
-			*eq = '\0';
-			env_list[i].name = strdup(env);
-			env_list[i].value = strdup(getenv(env));
-			*eq = '=';
-			i++;
+	int j = 0;
+	while ((idx = hmatch_r("", idx, &ep, &env_htab))) {
+		env_list[i].name = strdup(ep->key);
+		env_list[i].value = strdup(ep->data ? ep->data : "");
+		if (!env_list[i].name || !env_list[i].value) {
+			for (; j <= i; j++) {
+				if (env_list[j].name)
+					free(env_list[j].name);
+				if (env_list[j].value)
+					free(env_list[j].value);
+			}
+			free(env_list);
+			return -1;
 		}
+		i++;
 	}
+	qsort(env_list, env_size, sizeof(struct env_entry), env_compare);
 	*entries = env_list;
 	*count = env_size;
 	return 0;
