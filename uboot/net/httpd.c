@@ -115,7 +115,11 @@ int do_http_upgrade( const ulong size, const int upgrade_type ) {
 		
 	} else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_ART ) {
 		printf( "\n****************************\n*      ART UPGRADING       *\n* DO NOT POWER OFF DEVICE! *\n****************************\n" );
+#if defined(IPQ40XX_ENS620EXT)
+		sprintf(cmd, "sf probe && sf erase 0x180000 0x10000 && sf write 0x88000000 0x180000 0x10000");
+#else
 		sprintf(cmd, "sf probe && sf erase 0x170000 0x10000 && sf write 0x88000000 0x170000 0x10000");
+#endif
 		run_command(cmd, 0);
 		return 0;
 	} else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_MIBIB ) {

@@ -456,6 +456,9 @@ void main_loop (void)
 #if defined(IPQ40XX_EMR3500)
 			gpio_set_value(GPIO_EMR3500_WHITE_LED, 1);
 #endif
+#if defined(IPQ40XX_ENS620EXT)
+			gpio_set_value(GPIO_ENS620EXT_POWER_LED, 1);
+#endif
 #if defined(IPQ40XX_DAP2610)
 			gpio_set_value(GPIO_DAP2610_POWER_GREEN_LED, 1);
 #endif
@@ -497,6 +500,9 @@ void main_loop (void)
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
 #if defined(IPQ40XX_EMR3500)
 			gpio_set_value(GPIO_EMR3500_WHITE_LED, 0);
+#endif
+#if defined(IPQ40XX_ENS620EXT)
+			gpio_set_value(GPIO_ENS620EXT_POWER_LED, 0);
 #endif
 #if defined(IPQ40XX_DAP2610)
 			gpio_set_value(GPIO_DAP2610_POWER_GREEN_LED, 0);
@@ -555,6 +561,9 @@ void main_loop (void)
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
 #if defined(IPQ40XX_EMR3500)
 		gpio_set_value(GPIO_EMR3500_WHITE_LED, 1);
+#endif
+#if defined(IPQ40XX_ENS620EXT)
+		gpio_set_value(GPIO_ENS620EXT_POWER_LED, 1);
 #endif
 #if defined(IPQ40XX_DAP2610)
 		gpio_set_value(GPIO_DAP2610_POWER_GREEN_LED, 1);
