@@ -468,6 +468,9 @@ void main_loop (void)
 #if defined(IPQ40XX_WD1200G)
 			gpio_set_value(GPIO_WD1200G_RED_LED, 1);
 #endif
+#if defined(IPQ40XX_WRE6606)
+			gpio_set_value(GPIO_WRE6606_POWER_GREEN, 0);
+#endif
 #if defined(IPQ40XX_B1300)
 			gpio_set_value(GPIO_B1300_WIFI_LED, 1);
 #endif
@@ -518,6 +521,9 @@ void main_loop (void)
 #endif
 #if defined(IPQ40XX_B1300)
 			gpio_set_value(GPIO_B1300_WIFI_LED, 0);
+#endif
+#if defined(IPQ40XX_WRE6606)
+			gpio_set_value(GPIO_WRE6606_POWER_GREEN, 1);
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
@@ -582,6 +588,9 @@ void main_loop (void)
 #endif
 #if defined(IPQ40XX_B1300)
 		gpio_set_value(GPIO_B1300_MESH_LED, 1);
+#endif
+#if defined(IPQ40XX_WRE6606)
+		gpio_set_value(GPIO_WRE6606_POWER_GREEN, 0);
 #endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:

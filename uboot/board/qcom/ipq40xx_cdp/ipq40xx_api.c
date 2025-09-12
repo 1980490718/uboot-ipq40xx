@@ -117,6 +117,14 @@ void LED_INIT(void) {
 			gpio_set_value(GPIO_WD1200G_GREEN_LED, 0);
 			gpio_set_value(GPIO_WD1200G_BLUE_LED, 0);
 #endif
+#if defined(IPQ40XX_WRE6606)
+			gpio_set_value(GPIO_WRE6606_POWER_GREEN, 1);
+			gpio_set_value(GPIO_WRE6606_5G_GREEN, 1);
+			gpio_set_value(GPIO_WRE6606_5G_RED, 1);
+			gpio_set_value(GPIO_WRE6606_2G_RED, 1);
+			gpio_set_value(GPIO_WRE6606_2G_GREEN, 1);
+			gpio_set_value(GPIO_WRE6606_WPS_GREEN, 1);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 #if defined(IPQ40XX_AP1300)
@@ -191,6 +199,14 @@ void LED_BOOTING(void) {
 			gpio_set_value(GPIO_WD1200G_RED_LED, 1);
 			gpio_set_value(GPIO_WD1200G_GREEN_LED, 0);
 			gpio_set_value(GPIO_WD1200G_BLUE_LED, 0);
+#endif
+#if defined(IPQ40XX_WRE6606)
+			gpio_set_value(GPIO_WRE6606_POWER_GREEN, 0);
+			gpio_set_value(GPIO_WRE6606_5G_GREEN, 1);
+			gpio_set_value(GPIO_WRE6606_5G_RED, 1);
+			gpio_set_value(GPIO_WRE6606_2G_RED, 1);
+			gpio_set_value(GPIO_WRE6606_2G_GREEN, 1);
+			gpio_set_value(GPIO_WRE6606_WPS_GREEN, 1);
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
@@ -308,6 +324,8 @@ void board_names_init()
 		openwrt_firmware_size=0x14d0000;
 #elif defined(IPQ40XX_EX61X0V2)
 		openwrt_firmware_size=0xe10000;
+#elif defined(IPQ40XX_WRE6606)
+		openwrt_firmware_size=0xce0000;
 #else
 		openwrt_firmware_size=0x1e80000;
 #endif
@@ -357,6 +375,14 @@ void board_names_init()
 		led_upgrade_write_flashing_2=GPIO_WD1200G_BLUE_LED;
 		led_upgrade_erase_flashing=GPIO_WD1200G_BLUE_LED;
 		flashing_power_led=1;
+#endif
+#if defined(IPQ40XX_WRE6606)
+		power_led=GPIO_WRE6606_POWER_GREEN;
+		led_tftp_transfer_flashing=GPIO_WRE6606_POWER_GREEN;
+		led_upgrade_write_flashing_1=GPIO_WRE6606_2G_RED;
+		led_upgrade_write_flashing_2=GPIO_WRE6606_5G_RED;
+		led_upgrade_erase_flashing=GPIO_WRE6606_WPS_GREEN;
+		power_led_active_low=0;
 #endif
 		break;
 	default:

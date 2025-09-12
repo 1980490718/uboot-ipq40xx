@@ -192,6 +192,19 @@
 #define GPIO_WD1200G_BLUE_LED		58
 #define CONFIG_MODEL_NAME			"EZVIZ CS-W3-WD1200G EUP"
 #endif
+
+#if defined(IPQ40XX_WRE6606)
+#define CONFIG_ALT_BANNER			1
+#define IPQ40XX_WRE6606				1
+#define CONFIG_MODEL_NAME			"Zyxel WRE6606"
+#define GPIO_WRE6606_WPS_GREEN		1
+#define GPIO_WRE6606_5G_GREEN		3
+#define GPIO_WRE6606_POWER_GREEN	4
+#define GPIO_WRE6606_5G_RED			5
+#define GPIO_WRE6606_2G_RED			58
+#define GPIO_WRE6606_2G_GREEN		59
+#endif
+
 /* Network configuration */
 #define CONFIG_NET_MULTI
 
