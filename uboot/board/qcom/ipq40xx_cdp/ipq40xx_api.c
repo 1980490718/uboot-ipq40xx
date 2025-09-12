@@ -3,13 +3,11 @@
 #include <mmc.h>
 #include "ipq40xx_cdp.h"
 #include <../../../arch/arm/include/asm/mach-types.h>
+#include <asm/arch-qcom-common/gpio.h>
 
 #define BUFFERSIZE 2048
 #define CHECK_ADDR(addr, val) (*(volatile unsigned char *)(addr) == (val))
 
-extern board_ipq40xx_params_t *gboard_param;
-
-void gpio_set_value(int gpio, int value);
 void get_mmc_part_info(void);
 void HttpdLoop(void);
 
