@@ -88,6 +88,16 @@
 #define CONFIG_MODEL_NAME			"D-Link DAP-2610"
 #endif
 
+#if defined(IPQ40XX_EMR3500)
+#define CONFIG_ALT_BANNER			1
+#define IPQ40XX_EMR3500				1
+#define GPIO_EMR3500_WHITE_LED		4
+#define GPIO_EMR3500_BLUE_LED		2
+#define GPIO_EMR3500_RED_LED		0
+#define GPIO_EMR3500_ORANGE_LED		1
+#define CONFIG_MODEL_NAME			"EnGenius EMR3500"
+#endif
+
 #if defined(IPQ40XX_FOGPOD502)
 #define CONFIG_ALT_BANNER			1
 #define IPQ40XX_FOGPOD502			1
