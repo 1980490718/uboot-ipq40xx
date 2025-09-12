@@ -315,7 +315,7 @@ typedef struct {
 #define CONFIG_ENV_IS_IN_MMC
 #define CONFIG_SYS_MMC_ENV_DEV  0
 #endif
-
+#define CONFIG_GPIO_DEBUG	1
 #define CONFIG_AUTO_COMPLETE		1
 #define CONFIG_SYS_LONGHELP
 #define CONFIG_LZMA
