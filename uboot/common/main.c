@@ -417,6 +417,7 @@ void main_loop (void)
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 		gpio_reset_btn=40;
 		break;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
@@ -448,7 +449,11 @@ void main_loop (void)
 			gpio_set_value(GPIO_B2200_POWER_WHITE_LED, 0);
 #endif
 			break;
+		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+#if defined(IPQ40XX_DAP2610)
+			gpio_set_value(GPIO_DAP2610_POWER_GREEN_LED, 1);
+#endif
 #if defined(IPQ40XX_WD1200G)
 			gpio_set_value(GPIO_WD1200G_RED_LED, 1);
 #endif
@@ -483,7 +488,11 @@ void main_loop (void)
 			gpio_set_value(GPIO_B2200_POWER_WHITE_LED, 1);
 #endif
 			break;
+		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+#if defined(IPQ40XX_DAP2610)
+			gpio_set_value(GPIO_DAP2610_POWER_GREEN_LED, 0);
+#endif
 #if defined(IPQ40XX_WD1200G)
 			gpio_set_value(GPIO_WD1200G_RED_LED, 0);
 #endif
@@ -534,7 +543,11 @@ void main_loop (void)
 		gpio_set_value(GPIO_B2200_POWER_WHITE_LED, 0);
 #endif
 		break;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+#if defined(IPQ40XX_DAP2610)
+		gpio_set_value(GPIO_DAP2610_POWER_GREEN_LED, 1);
+#endif
 #if defined(IPQ40XX_WD1200G)
 		gpio_set_value(GPIO_WD1200G_RED_LED, 0);
 #endif

@@ -1302,6 +1302,28 @@ gpio_func_data_t ap_dk01_1_c2_sw_gpio_qfn[] = {
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 #endif
+#if defined(IPQ40XX_DAP2610)
+	{
+		.gpio = 4, //power red
+		.func = 0,
+		.pull = GPIO_NO_PULL,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_ENABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 5, //power green
+		.func = 0,
+		.pull = GPIO_NO_PULL,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_ENABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+#endif
 };
 
 gpio_func_data_t ap_dk01_ap4220_sw_gpio_qfn[] = {

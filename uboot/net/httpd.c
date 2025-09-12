@@ -75,6 +75,7 @@ int do_http_upgrade( const ulong size, const int upgrade_type ) {
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 				case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+				case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
 				case MACH_TYPE_IPQ40XX_DB_DK01_1_C1:
 				case MACH_TYPE_IPQ40XX_DB_DK02_1_C1:
 				case MACH_TYPE_IPQ40XX_TB832:

@@ -80,6 +80,14 @@
 #define CONFIG_MODEL_NAME			"Aliyun AP4220"
 #endif
 
+#if defined(IPQ40XX_DAP2610)
+#define CONFIG_ALT_BANNER			1
+#define IPQ40XX_DAP2610				1
+#define GPIO_DAP2610_POWER_RED_LED	4
+#define GPIO_DAP2610_POWER_GREEN_LED	5
+#define CONFIG_MODEL_NAME			"D-Link DAP-2610"
+#endif
+
 #if defined(IPQ40XX_FOGPOD502)
 #define CONFIG_ALT_BANNER			1
 #define IPQ40XX_FOGPOD502			1

@@ -53,6 +53,7 @@ int upgrade(void) {
 			}
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
 		case MACH_TYPE_IPQ40XX_DB_DK01_1_C1:
 		case MACH_TYPE_IPQ40XX_DB_DK02_1_C1:
 		case MACH_TYPE_IPQ40XX_TB832:
@@ -77,6 +78,12 @@ int upgrade(void) {
 }
 void LED_INIT(void) {
 	switch (gboard_param->machid) {
+		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
+#if defined(IPQ40XX_DAP2610)
+			gpio_set_value(GPIO_DAP2610_POWER_RED_LED, 0);
+			gpio_set_value(GPIO_DAP2610_POWER_GREEN_LED, 0);
+#endif
+			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
 #if defined(IPQ40XX_B1300)
 			gpio_set_value(GPIO_B1300_MESH_LED, 0);
@@ -127,12 +134,19 @@ void LED_INIT(void) {
 }
 void LED_BOOTING(void) {
 	switch (gboard_param->machid) {
+		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
+#if defined(IPQ40XX_DAP2610)
+			gpio_set_value(GPIO_DAP2610_POWER_RED_LED, 1);
+			gpio_set_value(GPIO_DAP2610_POWER_GREEN_LED, 0);
+#endif
+			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
 #if defined(IPQ40XX_WD1200G)
 			gpio_set_value(GPIO_WD1200G_RED_LED, 1);
 			gpio_set_value(GPIO_WD1200G_GREEN_LED, 0);
 			gpio_set_value(GPIO_WD1200G_BLUE_LED, 0);
 #endif
+			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 #if defined(IPQ40XX_AP1300)
 			gpio_set_value(GPIO_AP1300_POWER_LED, 1);
@@ -227,9 +241,12 @@ void board_names_init()
 		led_upgrade_erase_flashing=GPIO_AP4220_POWER_LED;
 		flashing_power_led=1;
 		break;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
 		openwrt_firmware_start=0x180000;
-#if defined(IPQ40XX_WD1200G)
+#if defined(IPQ40XX_DAP2610)
+		openwrt_firmware_size=0xdc0000;
+#elif defined(IPQ40XX_WD1200G)
 		openwrt_firmware_size=0x0e80000;
 #else
 		openwrt_firmware_size=0x1e80000;
@@ -240,6 +257,14 @@ void board_names_init()
 		led_upgrade_write_flashing_1=GPIO_B1300_MESH_LED;
 		led_upgrade_write_flashing_2=GPIO_B1300_WIFI_LED;
 		led_upgrade_erase_flashing=GPIO_B1300_WIFI_LED;
+#endif
+#if defined(IPQ40XX_DAP2610)
+		power_led=GPIO_DAP2610_POWER_GREEN_LED;
+		led_tftp_transfer_flashing=GPIO_DAP2610_POWER_RED_LED;
+		led_upgrade_write_flashing_1=GPIO_DAP2610_POWER_RED_LED;
+		led_upgrade_write_flashing_2=GPIO_DAP2610_POWER_GREEN_LED;
+		led_upgrade_erase_flashing=GPIO_DAP2610_POWER_RED_LED;
+		flashing_power_led=1;
 #endif
 #if defined(IPQ40XX_WD1200G)
 		power_led=GPIO_WD1200G_RED_LED;
