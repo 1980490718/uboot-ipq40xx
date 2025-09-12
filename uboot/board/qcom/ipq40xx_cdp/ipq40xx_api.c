@@ -356,6 +356,7 @@ void board_names_init()
 		led_upgrade_write_flashing_1=GPIO_WD1200G_GREEN_LED;
 		led_upgrade_write_flashing_2=GPIO_WD1200G_BLUE_LED;
 		led_upgrade_erase_flashing=GPIO_WD1200G_BLUE_LED;
+		flashing_power_led=1;
 #endif
 		break;
 	default:
