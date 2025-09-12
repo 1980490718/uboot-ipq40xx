@@ -1204,7 +1204,7 @@ gpio_func_data_t sw_gpio_qfn[] = {
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 #endif
-#if defined(IPQ40XX_EMR1500)
+#if defined(IPQ40XX_ENS620EXT)
 	{
 		.gpio = 58, //power
 		.func = 0,
