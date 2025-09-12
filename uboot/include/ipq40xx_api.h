@@ -129,6 +129,14 @@
 #define CONFIG_MODEL_NAME			"RyaTek FogPOD800/thinkplus FogPOD800G"
 #endif
 
+#if defined(IPQ40XX_WD1200G)
+#define CONFIG_ALT_BANNER			1
+#define IPQ40XX_WD1200G				1
+#define GPIO_WD1200G_RED_LED		0
+#define GPIO_WD1200G_GREEN_LED		3
+#define GPIO_WD1200G_BLUE_LED		58
+#define CONFIG_MODEL_NAME			"EZVIZ CS-W3-WD1200G EUP"
+#endif
 /* Network configuration */
 #define CONFIG_NET_MULTI
 
