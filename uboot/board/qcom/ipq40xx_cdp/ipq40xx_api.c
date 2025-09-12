@@ -85,6 +85,16 @@ void LED_INIT(void) {
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+#if defined(IPQ40XX_EX61X0V2)
+			gpio_set_value(GPIO_EX61X0V2_POWER_AMBER, 0);
+			gpio_set_value(GPIO_EX61X0V2_POWER_GREEN, 0);
+			gpio_set_value(GPIO_EX61X0V2_BLUE_RIGHT, 0);
+			gpio_set_value(GPIO_EX61X0V2_BLUE_LEFT, 0);
+			gpio_set_value(GPIO_EX61X0V2_GREEN_CLIENT, 0);
+			gpio_set_value(GPIO_EX61X0V2_RED_CLIENT, 0);
+			gpio_set_value(GPIO_EX61X0V2_GREEN_ROUTER, 0);
+			gpio_set_value(GPIO_EX61X0V2_RED_ROUTER, 0);
+#endif
 #if defined(IPQ40XX_B1300)
 			gpio_set_value(GPIO_B1300_MESH_LED, 0);
 			gpio_set_value(GPIO_B1300_WIFI_LED, 0);
@@ -154,6 +164,16 @@ void LED_BOOTING(void) {
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+#if defined(IPQ40XX_EX61X0V2)
+			gpio_set_value(GPIO_EX61X0V2_POWER_AMBER, 1);
+			gpio_set_value(GPIO_EX61X0V2_POWER_GREEN, 0);
+			gpio_set_value(GPIO_EX61X0V2_BLUE_RIGHT, 0);
+			gpio_set_value(GPIO_EX61X0V2_BLUE_LEFT, 0);
+			gpio_set_value(GPIO_EX61X0V2_GREEN_CLIENT, 0);
+			gpio_set_value(GPIO_EX61X0V2_RED_CLIENT, 0);
+			gpio_set_value(GPIO_EX61X0V2_GREEN_ROUTER, 0);
+			gpio_set_value(GPIO_EX61X0V2_RED_ROUTER, 0);
+#endif
 #if defined(IPQ40XX_EMR3500)
 			gpio_set_value(GPIO_EMR3500_WHITE_LED, 1);
 			gpio_set_value(GPIO_EMR3500_BLUE_LED, 0);
@@ -273,6 +293,8 @@ void board_names_init()
 		openwrt_firmware_start=0x200000;
 #elif defined(IPQ40XX_ENS620EXT)
 		openwrt_firmware_start=0x190000;
+#elif defined(IPQ40XX_EX61X0V2)
+		openwrt_firmware_start=0x1b0000;
 #else
 		openwrt_firmware_start=0x180000;
 #endif
@@ -284,6 +306,8 @@ void board_names_init()
 		openwrt_firmware_size=0x1e00000;
 #elif defined(IPQ40XX_ENS620EXT)
 		openwrt_firmware_size=0x14d0000;
+#elif defined(IPQ40XX_EX61X0V2)
+		openwrt_firmware_size=0xe10000;
 #else
 		openwrt_firmware_size=0x1e80000;
 #endif
@@ -293,6 +317,14 @@ void board_names_init()
 		led_upgrade_write_flashing_1=GPIO_B1300_MESH_LED;
 		led_upgrade_write_flashing_2=GPIO_B1300_WIFI_LED;
 		led_upgrade_erase_flashing=GPIO_B1300_WIFI_LED;
+#endif
+#if defined(IPQ40XX_EX61X0V2)
+		power_led=GPIO_EX61X0V2_POWER_AMBER;
+		led_tftp_transfer_flashing=GPIO_EX61X0V2_POWER_AMBER;
+		led_upgrade_write_flashing_1=GPIO_EX61X0V2_BLUE_RIGHT;
+		led_upgrade_write_flashing_2=GPIO_EX61X0V2_BLUE_LEFT;
+		led_upgrade_erase_flashing=GPIO_EX61X0V2_POWER_AMBER;
+		flashing_power_led=1;
 #endif
 #if defined(IPQ40XX_EMR3500)
 		power_led=GPIO_EMR3500_WHITE_LED;
