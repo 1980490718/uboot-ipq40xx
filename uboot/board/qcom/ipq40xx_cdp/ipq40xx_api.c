@@ -73,6 +73,7 @@ int upgrade(void) {
 				"nand device 1 && nand erase 0x%x 0x%x && nand write 0x88000000 0x%x $filesize",
 				openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start);
 			break;
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 			snprintf(cmd, sizeof(cmd),
 				"nand device 0 && nand erase 0x%x 0x%x && nand write 0x88000000 0x%x $filesize",
