@@ -424,6 +424,7 @@ void board_names_init()
 		led_upgrade_erase_flashing=GPIO_WRE6606_WPS_GREEN;
 		power_led_active_low=0;
 #endif
+		break;
 	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 #if defined(IPQ40XX_E2600ACC2)
 		openwrt_firmware_start=0x0;

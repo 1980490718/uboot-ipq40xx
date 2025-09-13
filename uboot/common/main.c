@@ -545,6 +545,7 @@ void main_loop (void)
 #if defined(IPQ40XX_AC58U)
 			gpio_set_value(GPIO_AC58U_POWER_LED, 0);
 #endif
+			break;
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 #if defined(IPQ40XX_E2600ACC2)
 			gpio_set_value(GPIO_E2600ACC2_CTRL1_GREEN, 0);
