@@ -31,6 +31,7 @@ static void format_size_string(char *buffer, size_t buffer_size, unsigned int si
 static const char* get_board_type_string(void) {
 	switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1: return "IPQ40XX_AP_DK04_1_C1";
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2: return "IPQ40XX_AP_DK04_1_C2";
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3: return "IPQ40XX_AP_DK04_1_C3";
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1: return "IPQ40XX_AP_DK01_1_C1";
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1: return "IPQ40XX_AP_DK01_1_S1";
@@ -62,6 +63,7 @@ int read_firmware(void) {
 	get_firmware_type_string(fw_type);
 	switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 			if (fw_type == FW_TYPE_OPENWRT_EMMC) {
 				print_firmware_read_info("eMMC", openwrt_firmware_size, openwrt_firmware_start);

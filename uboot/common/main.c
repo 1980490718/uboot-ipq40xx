@@ -412,6 +412,7 @@ void main_loop (void)
 	int gpio_reset_btn=0;
 	switch (gboard_param->machid) {
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
 	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
 	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 		gpio_reset_btn=18;
@@ -446,6 +447,13 @@ void main_loop (void)
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 #if defined(IPQ40XX_S1300)
 			gpio_set_value(GPIO_S1300_WIFI_LED, 1);
+#endif
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+#if defined(IPQ40XX_LE1)
+			gpio_set_value(GPIO_LE1_USB_GREEN, 1);
+			gpio_set_value(GPIO_LE1_WLAN2G_GREEN, 1);
+			gpio_set_value(GPIO_LE1_WLAN5G_GREEN, 1);
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
@@ -517,6 +525,13 @@ void main_loop (void)
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 #if defined(IPQ40XX_S1300)
 			gpio_set_value(GPIO_S1300_WIFI_LED, 0);
+#endif
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+#if defined(IPQ40XX_LE1)
+			gpio_set_value(GPIO_LE1_USB_GREEN, 0);
+			gpio_set_value(GPIO_LE1_WLAN2G_GREEN, 0);
+			gpio_set_value(GPIO_LE1_WLAN5G_GREEN, 0);
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
@@ -606,6 +621,13 @@ void main_loop (void)
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 #if defined(IPQ40XX_S1300)
 		gpio_set_value(GPIO_S1300_MESH_LED, 1);
+#endif
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+#if defined(IPQ40XX_LE1)
+		gpio_set_value(GPIO_LE1_USB_GREEN, 1);
+		gpio_set_value(GPIO_LE1_WLAN2G_GREEN, 1);
+		gpio_set_value(GPIO_LE1_WLAN5G_GREEN, 1);
 #endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:

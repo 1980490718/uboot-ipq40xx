@@ -286,6 +286,38 @@ gpio_func_data_t spi_nor_bga[] = {
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 #endif
+#if defined(IPQ40XX_LE1)
+	{
+		.gpio = 36, /*LE1 USB green*/
+		.func = 0,
+		.pull = GPIO_NO_PULL,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_ENABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 32, /*LE1 2G green*/
+		.func = 0,
+		.pull = GPIO_NO_PULL,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_ENABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 50, /*LE1 5G green*/
+		.func = 0,
+		.pull = GPIO_NO_PULL,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_ENABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+#endif
 #if defined(IPQ40XX_R619AC)
 	{
 		.gpio = 39, /* R619AC power blue */
@@ -2285,7 +2317,11 @@ board_ipq40xx_params_t board_params[] = {
 		.spi_nand_available = 0,
 		.nor_nand_available = 0,
 		.nor_emmc_available = 0,
+#if defined(IPQ40XX_LE1)
+		.dtb_config_name = { "config@2", "config@ap.dk04.1-c2", "config@1" },
+#else
 		.dtb_config_name = { "config@2", "config@ap.dk04.1-c2" },
+#endif
 	},
 	{
 		.machid = MACH_TYPE_IPQ40XX_AP_DK04_1_C3,

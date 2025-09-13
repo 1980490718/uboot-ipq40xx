@@ -73,6 +73,7 @@ int do_http_upgrade( const ulong size, const int upgrade_type ) {
 		if ( fw_type == FW_TYPE_OPENWRT ) {
 			switch (gboard_param->machid) {
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+				case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 				case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
 				case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:

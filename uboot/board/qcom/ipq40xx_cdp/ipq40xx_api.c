@@ -41,6 +41,7 @@ int upgrade(void) {
 	unsigned long file_size = filesize ? hex2int(filesize, strlen(filesize)) : 0;
 	switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 			if (fw_type == FW_TYPE_OPENWRT_EMMC) {
 				snprintf(cmd, sizeof(cmd),
@@ -162,6 +163,13 @@ void LED_INIT(void) {
 			gpio_set_value(GPIO_S1300_WIFI_LED, 0);
 #endif
 			break;
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+#if defined(IPQ40XX_LE1)
+			gpio_set_value(GPIO_LE1_USB_GREEN, 0);
+			gpio_set_value(GPIO_LE1_WLAN2G_GREEN, 0);
+			gpio_set_value(GPIO_LE1_WLAN5G_GREEN, 0);
+#endif
+			break;
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 #if defined(IPQ40XX_B2200)
 			gpio_set_value(GPIO_B2200_INET_WHITE_LED, 1);
@@ -272,6 +280,13 @@ void LED_BOOTING(void) {
 			gpio_set_value(GPIO_AP4220_2GWIFI_LED, 1);
 			gpio_set_value(GPIO_AP4220_5GWIFI_LED, 0);
 			break;
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+#if defined(IPQ40XX_LE1)
+			gpio_set_value(GPIO_LE1_USB_GREEN, 1);
+			gpio_set_value(GPIO_LE1_WLAN2G_GREEN, 1);
+			gpio_set_value(GPIO_LE1_WLAN5G_GREEN, 1);
+#endif
+			break;
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 #if defined(IPQ40XX_E2600ACC2)
 			gpio_set_value(GPIO_E2600ACC2_WLAN0_GREEN, 0);
@@ -332,6 +347,18 @@ void board_names_init()
 		led_upgrade_erase_flashing=GPIO_S1300_WIFI_LED;
 #endif
 		get_mmc_part_info();
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+#if defined(IPQ40XX_LE1)
+		openwrt_firmware_start=0x180000;
+		openwrt_firmware_size=0x1e80000;
+		power_led=GPIO_LE1_USB_GREEN;
+		led_tftp_transfer_flashing=GPIO_LE1_USB_GREEN;
+		led_upgrade_write_flashing_1=GPIO_LE1_WLAN2G_GREEN;
+		led_upgrade_write_flashing_2=GPIO_LE1_WLAN5G_GREEN;
+		led_upgrade_erase_flashing=GPIO_LE1_USB_GREEN;
+		flashing_power_led=1;
+#endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 		openwrt_firmware_start=0x180000;

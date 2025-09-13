@@ -254,6 +254,15 @@
 #define GPIO_E2600ACC2_CTRL3_GREEN		31
 #endif
 
+#if defined(IPQ40XX_LE1)
+#define CONFIG_ALT_BANNER			1
+#define IPQ40XX_LE1				    1
+#define CONFIG_MODEL_NAME			"YYeTs LE1"
+#define GPIO_LE1_USB_GREEN			36
+#define GPIO_LE1_WLAN2G_GREEN		32
+#define GPIO_LE1_WLAN5G_GREEN		50
+#endif
+
 /* Network configuration */
 #define CONFIG_NET_MULTI
 
