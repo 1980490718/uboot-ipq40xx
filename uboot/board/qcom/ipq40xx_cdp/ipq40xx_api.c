@@ -123,6 +123,11 @@ void LED_INIT(void) {
 			gpio_set_value(GPIO_WD1200G_GREEN_LED, 0);
 			gpio_set_value(GPIO_WD1200G_BLUE_LED, 0);
 #endif
+#if defined(IPQ40XX_WPJ428)
+			gpio_set_value(GPIO_WPJ428_RSS4_GREEN, 1);
+			gpio_set_value(GPIO_WPJ428_RSS3_GREEN, 1);
+			gpio_set_value(GPIO_WPJ428_BEEPER_LED, 1);
+#endif
 #if defined(IPQ40XX_WRE6606)
 			gpio_set_value(GPIO_WRE6606_POWER_GREEN, 1);
 			gpio_set_value(GPIO_WRE6606_5G_GREEN, 1);
@@ -227,6 +232,11 @@ void LED_BOOTING(void) {
 			gpio_set_value(GPIO_WD1200G_RED_LED, 1);
 			gpio_set_value(GPIO_WD1200G_GREEN_LED, 0);
 			gpio_set_value(GPIO_WD1200G_BLUE_LED, 0);
+#endif
+#if defined(IPQ40XX_WPJ428)
+			gpio_set_value(GPIO_WPJ428_RSS4_GREEN, 0);
+			gpio_set_value(GPIO_WPJ428_RSS3_GREEN, 0);
+			gpio_set_value(GPIO_WPJ428_BEEPER_LED, 0);
 #endif
 #if defined(IPQ40XX_WRE6606)
 			gpio_set_value(GPIO_WRE6606_POWER_GREEN, 0);
@@ -426,6 +436,14 @@ void board_names_init()
 		led_upgrade_write_flashing_2=GPIO_WD1200G_BLUE_LED;
 		led_upgrade_erase_flashing=GPIO_WD1200G_BLUE_LED;
 		flashing_power_led=1;
+#endif
+#if defined(IPQ40XX_WPJ428)
+		power_led=GPIO_WPJ428_BEEPER_LED;
+		led_tftp_transfer_flashing=GPIO_WPJ428_BEEPER_LED;
+		led_upgrade_write_flashing_1=GPIO_WPJ428_RSS4_GREEN;
+		led_upgrade_write_flashing_2=GPIO_WPJ428_RSS3_GREEN;
+		led_upgrade_erase_flashing=GPIO_WPJ428_BEEPER_LED;
+		power_led_active_low=0;
 #endif
 #if defined(IPQ40XX_WRE6606)
 		power_led=GPIO_WRE6606_POWER_GREEN;
