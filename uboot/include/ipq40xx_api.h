@@ -158,6 +158,15 @@
 #define CONFIG_MODEL_NAME			"GL.iNet GL-S1300"
 #endif
 
+#if defined(IPQ40XX_R619AC)
+#define CONFIG_ALT_BANNER			1
+#define IPQ40XX_R619AC				1
+#define CONFIG_MODEL_NAME			"P&W R619AC"
+#define GPIO_R619AC_POWER_BLUE		39
+#define GPIO_R619AC_2G_BLUE			32
+#define GPIO_R619AC_5G_BLUE			50
+#endif
+
 #if defined(IPQ40XX_B2200)
 #define CONFIG_ALT_BANNER			1
 /* NB: b2200 white led active low */

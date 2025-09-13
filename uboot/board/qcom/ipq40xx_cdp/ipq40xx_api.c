@@ -174,6 +174,13 @@ void LED_INIT(void) {
 			gpio_set_value(GPIO_E2600ACC2_CTRL3_GREEN, 0);
 #endif
 			break;
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+#if defined(IPQ40XX_R619AC)
+			gpio_set_value(GPIO_R619AC_POWER_BLUE, 1);
+			gpio_set_value(GPIO_R619AC_2G_BLUE, 1);
+			gpio_set_value(GPIO_R619AC_5G_BLUE, 1);
+#endif
+			break;
 		default:
 			break;
 	}
@@ -251,6 +258,13 @@ void LED_BOOTING(void) {
 			gpio_set_value(GPIO_E2600ACC2_CTRL1_GREEN, 1);
 			gpio_set_value(GPIO_E2600ACC2_CTRL2_GREEN, 1);
 			gpio_set_value(GPIO_E2600ACC2_CTRL3_GREEN, 1);
+#endif
+			break;
+case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+#if defined(IPQ40XX_R619AC)
+			gpio_set_value(GPIO_R619AC_POWER_BLUE, 0);
+			gpio_set_value(GPIO_R619AC_2G_BLUE, 0);
+			gpio_set_value(GPIO_R619AC_5G_BLUE, 0);
 #endif
 			break;
 		default:
@@ -419,6 +433,18 @@ void board_names_init()
 		led_upgrade_write_flashing_1=GPIO_E2600ACC2_CTRL2_GREEN;
 		led_upgrade_write_flashing_2=GPIO_E2600ACC2_CTRL3_GREEN;
 		led_upgrade_erase_flashing=GPIO_E2600ACC2_CTRL1_GREEN;
+		flashing_power_led=1;
+#endif
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+#if defined(IPQ40XX_R619AC)
+		openwrt_firmware_start=0x0;
+		openwrt_firmware_size=0x8000000;
+		power_led=GPIO_R619AC_POWER_BLUE;
+		led_tftp_transfer_flashing=GPIO_R619AC_POWER_BLUE;
+		led_upgrade_write_flashing_1=GPIO_R619AC_2G_BLUE;
+		led_upgrade_write_flashing_2=GPIO_R619AC_5G_BLUE;
+		led_upgrade_erase_flashing=GPIO_R619AC_POWER_BLUE;
 		flashing_power_led=1;
 #endif
 		break;
