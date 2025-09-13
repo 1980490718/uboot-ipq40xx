@@ -497,6 +497,10 @@ void main_loop (void)
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+#if defined(IPQ40XX_DR40X9)
+			gpio_set_value(GPIO_DR40X9_2G_GREEN, 0);
+			gpio_set_value(GPIO_DR40X9_5G_GREEN, 0);
+#endif
 #if defined(IPQ40XX_R619AC)
 			gpio_set_value(GPIO_R619AC_POWER_BLUE, 1);
 #endif
@@ -561,6 +565,12 @@ void main_loop (void)
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+#if defined(IPQ40XX_DR40X9)
+			gpio_set_value(GPIO_DR40X9_2G_GREEN, 1);
+			gpio_set_value(GPIO_DR40X9_5G_GREEN, 1);
+			gpio_set_value(GPIO_DR40X9_2G_STRENGTH, 0);
+			gpio_set_value(GPIO_DR40X9_5G_STRENGTH, 0);
+#endif
 #if defined(IPQ40XX_R619AC)
 			gpio_set_value(GPIO_R619AC_POWER_BLUE, 0);
 #endif
@@ -647,6 +657,12 @@ void main_loop (void)
 #endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+#if defined(IPQ40XX_DR40X9)
+		gpio_set_value(GPIO_DR40X9_2G_GREEN, 0);
+		gpio_set_value(GPIO_DR40X9_5G_GREEN, 0);
+		gpio_set_value(GPIO_DR40X9_2G_STRENGTH, 1);
+		gpio_set_value(GPIO_DR40X9_5G_STRENGTH, 1);
+#endif
 #if defined(IPQ40XX_R619AC)
 		gpio_set_value(GPIO_R619AC_POWER_BLUE, 1);
 #endif

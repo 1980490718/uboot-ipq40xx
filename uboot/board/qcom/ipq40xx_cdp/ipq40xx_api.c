@@ -181,6 +181,12 @@ void LED_INIT(void) {
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+#if defined(IPQ40XX_DR40X9)
+			gpio_set_value(GPIO_DR40X9_2G_GREEN, 0);
+			gpio_set_value(GPIO_DR40X9_5G_GREEN, 0);
+			gpio_set_value(GPIO_DR40X9_2G_STRENGTH, 0);
+			gpio_set_value(GPIO_DR40X9_5G_STRENGTH, 0);
+#endif
 #if defined(IPQ40XX_R619AC)
 			gpio_set_value(GPIO_R619AC_POWER_BLUE, 1);
 			gpio_set_value(GPIO_R619AC_2G_BLUE, 1);
@@ -277,6 +283,12 @@ void LED_BOOTING(void) {
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+#if defined(IPQ40XX_DR40X9)
+			gpio_set_value(GPIO_DR40X9_2G_GREEN, 1);
+			gpio_set_value(GPIO_DR40X9_5G_GREEN, 1);
+			gpio_set_value(GPIO_DR40X9_2G_STRENGTH, 1);
+			gpio_set_value(GPIO_DR40X9_5G_STRENGTH, 1);
+#endif
 #if defined(IPQ40XX_R619AC)
 			gpio_set_value(GPIO_R619AC_POWER_BLUE, 0);
 			gpio_set_value(GPIO_R619AC_2G_BLUE, 0);
@@ -467,6 +479,16 @@ void board_names_init()
 #endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+#if defined(IPQ40XX_DR40X9)
+		openwrt_firmware_start=0x0;
+		openwrt_firmware_size=0x4000000;
+		power_led=GPIO_DR40X9_2G_GREEN;
+		led_tftp_transfer_flashing=GPIO_DR40X9_2G_GREEN;
+		led_upgrade_erase_flashing=GPIO_DR40X9_5G_GREEN;
+		led_upgrade_write_flashing_1=GPIO_DR40X9_2G_STRENGTH;
+		led_upgrade_write_flashing_2=GPIO_DR40X9_5G_STRENGTH;
+		flashing_power_led=1;
+#endif
 #if defined(IPQ40XX_R619AC)
 		openwrt_firmware_start=0x0;
 		openwrt_firmware_size=0x8000000;

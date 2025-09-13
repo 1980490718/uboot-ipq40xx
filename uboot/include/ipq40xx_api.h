@@ -196,6 +196,16 @@
 #define CONFIG_MODEL_NAME			"GL.iNet GL-B1300"
 #endif
 
+#if defined(IPQ40XX_DR40X9)
+#define CONFIG_ALT_BANNER			1
+#define IPQ40XX_DR40X9				1
+#define CONFIG_MODEL_NAME			"Wallystech DR40X9"
+#define GPIO_DR40X9_2G_GREEN		32
+#define GPIO_DR40X9_5G_GREEN		50
+#define GPIO_DR40X9_2G_STRENGTH		36
+#define GPIO_DR40X9_5G_STRENGTH		39
+#endif
+
 #if defined(IPQ40XX_FOGPOD800)
 #define CONFIG_ALT_BANNER			1
 #define IPQ40XX_FOGPOD800			1
