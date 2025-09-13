@@ -169,6 +169,9 @@ void LED_INIT(void) {
 			gpio_set_value(GPIO_LE1_WLAN2G_GREEN, 0);
 			gpio_set_value(GPIO_LE1_WLAN5G_GREEN, 0);
 #endif
+#if defined(IPQ40XX_X1PRO)
+			gpio_set_value(GPIO_X1PRO_GREEN_STATUS, 0);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 #if defined(IPQ40XX_B2200)
@@ -286,6 +289,9 @@ void LED_BOOTING(void) {
 			gpio_set_value(GPIO_LE1_WLAN2G_GREEN, 1);
 			gpio_set_value(GPIO_LE1_WLAN5G_GREEN, 1);
 #endif
+#if defined(IPQ40XX_X1PRO)
+			gpio_set_value(GPIO_X1PRO_GREEN_STATUS, 1);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 #if defined(IPQ40XX_E2600ACC2)
@@ -349,14 +355,22 @@ void board_names_init()
 		get_mmc_part_info();
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
-#if defined(IPQ40XX_LE1)
 		openwrt_firmware_start=0x180000;
 		openwrt_firmware_size=0x1e80000;
+#if defined(IPQ40XX_LE1)
 		power_led=GPIO_LE1_USB_GREEN;
 		led_tftp_transfer_flashing=GPIO_LE1_USB_GREEN;
 		led_upgrade_write_flashing_1=GPIO_LE1_WLAN2G_GREEN;
 		led_upgrade_write_flashing_2=GPIO_LE1_WLAN5G_GREEN;
 		led_upgrade_erase_flashing=GPIO_LE1_USB_GREEN;
+		flashing_power_led=1;
+#endif
+#if defined(IPQ40XX_X1PRO)
+		power_led=GPIO_X1PRO_GREEN_STATUS;
+		led_tftp_transfer_flashing=GPIO_X1PRO_GREEN_STATUS;
+		led_upgrade_write_flashing_1=GPIO_X1PRO_GREEN_STATUS;
+		led_upgrade_write_flashing_2=GPIO_X1PRO_GREEN_STATUS;
+		led_upgrade_erase_flashing=GPIO_X1PRO_GREEN_STATUS;
 		flashing_power_led=1;
 #endif
 		break;

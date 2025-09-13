@@ -254,6 +254,13 @@
 #define GPIO_E2600ACC2_CTRL3_GREEN		31
 #endif
 
+#if defined(IPQ40XX_X1PRO)
+#define CONFIG_ALT_BANNER			1
+#define IPQ40XX_X1PRO				1
+#define CONFIG_MODEL_NAME			"Telco X1 Pro"
+#define GPIO_X1PRO_GREEN_STATUS		68
+#endif
+
 #if defined(IPQ40XX_LE1)
 #define CONFIG_ALT_BANNER			1
 #define IPQ40XX_LE1				    1

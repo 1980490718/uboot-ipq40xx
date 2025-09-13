@@ -105,6 +105,7 @@ int do_http_upgrade( const ulong size, const int upgrade_type ) {
 		}else if (fw_type == FW_TYPE_OPENWRT_EMMC){
 			switch (gboard_param->machid) {
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+				case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 					//erase 531MB, defealt partion 16MB kernel + 512MB rootfs
 					sprintf(cmd, "mmc erase 0x0 0x109800 && mmc write 0x88000000 0x0 0x%lx", (unsigned long int)(size/512+1));

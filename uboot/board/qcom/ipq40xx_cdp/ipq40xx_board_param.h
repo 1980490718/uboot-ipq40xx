@@ -244,6 +244,18 @@ gpio_func_data_t spi_nor_bga[] = {
 		.gpio_od_en = GPIO_OD_DISABLE,
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
+#if defined(IPQ40XX_X1PRO)
+	{
+		.gpio = 68, /*x1pro green status*/
+		.func = 0,
+		.pull = GPIO_NO_PULL,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_ENABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+#endif
 #if defined(IPQ40XX_DR40X9)
 	{
 		.gpio = 32, /*dr40x9 2g green*/
@@ -2317,7 +2329,7 @@ board_ipq40xx_params_t board_params[] = {
 		.spi_nand_available = 0,
 		.nor_nand_available = 0,
 		.nor_emmc_available = 0,
-#if defined(IPQ40XX_LE1)
+#if defined(IPQ40XX_LE1) || defined(IPQ40XX_X1PRO)
 		.dtb_config_name = { "config@2", "config@ap.dk04.1-c2", "config@1" },
 #else
 		.dtb_config_name = { "config@2", "config@ap.dk04.1-c2" },

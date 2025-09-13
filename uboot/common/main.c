@@ -455,6 +455,9 @@ void main_loop (void)
 			gpio_set_value(GPIO_LE1_WLAN2G_GREEN, 1);
 			gpio_set_value(GPIO_LE1_WLAN5G_GREEN, 1);
 #endif
+#if defined(IPQ40XX_X1PRO)
+			gpio_set_value(GPIO_X1PRO_GREEN_STATUS, 1);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 #if defined(IPQ40XX_B2200)
@@ -532,6 +535,9 @@ void main_loop (void)
 			gpio_set_value(GPIO_LE1_USB_GREEN, 0);
 			gpio_set_value(GPIO_LE1_WLAN2G_GREEN, 0);
 			gpio_set_value(GPIO_LE1_WLAN5G_GREEN, 0);
+#endif
+#if defined(IPQ40XX_X1PRO)
+			gpio_set_value(GPIO_X1PRO_GREEN_STATUS, 0);
 #endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
@@ -628,6 +634,9 @@ void main_loop (void)
 		gpio_set_value(GPIO_LE1_USB_GREEN, 1);
 		gpio_set_value(GPIO_LE1_WLAN2G_GREEN, 1);
 		gpio_set_value(GPIO_LE1_WLAN5G_GREEN, 1);
+#endif
+#if defined(IPQ40XX_X1PRO)
+		gpio_set_value(GPIO_X1PRO_GREEN_STATUS, 0);
 #endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
