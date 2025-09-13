@@ -497,6 +497,9 @@ void main_loop (void)
 #if defined(IPQ40XX_R619AC)
 			gpio_set_value(GPIO_R619AC_POWER_BLUE, 1);
 #endif
+#if defined(IPQ40XX_OAP100)
+			gpio_set_value(GPIO_OAP100_SYSTEM_GREEN, 0);
+#endif
 			break;
 		default:
 			break;
@@ -554,6 +557,9 @@ void main_loop (void)
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
 #if defined(IPQ40XX_R619AC)
 			gpio_set_value(GPIO_R619AC_POWER_BLUE, 0);
+#endif
+#if defined(IPQ40XX_OAP100)
+			gpio_set_value(GPIO_OAP100_SYSTEM_GREEN, 0);
 #endif
 			break;
 		default:
@@ -634,6 +640,9 @@ void main_loop (void)
 	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
 #if defined(IPQ40XX_R619AC)
 		gpio_set_value(GPIO_R619AC_POWER_BLUE, 1);
+#endif
+#if defined(IPQ40XX_OAP100)
+		gpio_set_value(GPIO_OAP100_SYSTEM_GREEN, 1);
 #endif
 		break;
 	default:

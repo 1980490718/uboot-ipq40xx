@@ -149,6 +149,15 @@
 #define CONFIG_MODEL_NAME			"GL.iNet GL-AP1300"
 #endif
 
+#if defined(IPQ40XX_OAP100)
+#define CONFIG_ALT_BANNER			1
+#define IPQ40XX_OAP100				1
+#define CONFIG_MODEL_NAME			"EdgeCore OAP-100"
+#define GPIO_OAP100_SYSTEM_GREEN	22
+#define GPIO_OAP100_2G_BLUE			34
+#define GPIO_OAP100_5G_BLUE			35
+#endif
+
 #if defined(IPQ40XX_S1300)
 #define CONFIG_ALT_BANNER			1
 #define IPQ40XX_S1300				1
