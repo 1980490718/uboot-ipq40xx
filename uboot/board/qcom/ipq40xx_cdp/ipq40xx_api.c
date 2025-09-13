@@ -73,6 +73,11 @@ int upgrade(void) {
 				"nand device 1 && nand erase 0x%x 0x%x && nand write 0x88000000 0x%x $filesize",
 				openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start);
 			break;
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+			snprintf(cmd, sizeof(cmd),
+				"nand device 0 && nand erase 0x%x 0x%x && nand write 0x88000000 0x%x $filesize",
+				openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start);
+			break;
 	}
 	return run_command(cmd, 0);
 }
@@ -159,6 +164,16 @@ void LED_INIT(void) {
 			gpio_set_value(GPIO_B2200_POWER_WHITE_LED, 1);
 #endif
 			break;
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+#if defined(IPQ40XX_E2600ACC2)
+			gpio_set_value(GPIO_E2600ACC2_WLAN0_GREEN, 0);
+			gpio_set_value(GPIO_E2600ACC2_WLAN1_GREEN, 0);
+			gpio_set_value(GPIO_E2600ACC2_USB_GREEN, 0);
+			gpio_set_value(GPIO_E2600ACC2_CTRL1_GREEN, 0);
+			gpio_set_value(GPIO_E2600ACC2_CTRL2_GREEN, 0);
+			gpio_set_value(GPIO_E2600ACC2_CTRL3_GREEN, 0);
+#endif
+			break;
 		default:
 			break;
 	}
@@ -227,6 +242,17 @@ void LED_BOOTING(void) {
 			gpio_set_value(GPIO_AP4220_POWER_LED, 0);
 			gpio_set_value(GPIO_AP4220_2GWIFI_LED, 1);
 			gpio_set_value(GPIO_AP4220_5GWIFI_LED, 0);
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+#if defined(IPQ40XX_E2600ACC2)
+			gpio_set_value(GPIO_E2600ACC2_WLAN0_GREEN, 0);
+			gpio_set_value(GPIO_E2600ACC2_WLAN1_GREEN, 0);
+			gpio_set_value(GPIO_E2600ACC2_USB_GREEN, 0);
+			gpio_set_value(GPIO_E2600ACC2_CTRL1_GREEN, 1);
+			gpio_set_value(GPIO_E2600ACC2_CTRL2_GREEN, 1);
+			gpio_set_value(GPIO_E2600ACC2_CTRL3_GREEN, 1);
+#endif
+			break;
 		default:
 			break;
 	}
@@ -383,6 +409,17 @@ void board_names_init()
 		led_upgrade_write_flashing_2=GPIO_WRE6606_5G_RED;
 		led_upgrade_erase_flashing=GPIO_WRE6606_WPS_GREEN;
 		power_led_active_low=0;
+#endif
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+#if defined(IPQ40XX_E2600ACC2)
+		openwrt_firmware_start=0x0;
+		openwrt_firmware_size=0x4000000;
+		power_led=GPIO_E2600ACC2_CTRL1_GREEN;
+		led_tftp_transfer_flashing=GPIO_E2600ACC2_CTRL1_GREEN;
+		led_upgrade_write_flashing_1=GPIO_E2600ACC2_CTRL2_GREEN;
+		led_upgrade_write_flashing_2=GPIO_E2600ACC2_CTRL3_GREEN;
+		led_upgrade_erase_flashing=GPIO_E2600ACC2_CTRL1_GREEN;
+		flashing_power_led=1;
 #endif
 		break;
 	default:

@@ -412,6 +412,7 @@ void main_loop (void)
 	int gpio_reset_btn=0;
 	switch (gboard_param->machid) {
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 		gpio_reset_btn=18;
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
@@ -486,6 +487,11 @@ void main_loop (void)
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 			gpio_set_value(GPIO_AP4220_POWER_LED, 1);
 			break;
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+#if defined(IPQ40XX_E2600ACC2)
+			gpio_set_value(GPIO_E2600ACC2_CTRL1_GREEN, 1);
+#endif
+			break;
 		default:
 			break;
 		}
@@ -532,6 +538,10 @@ void main_loop (void)
 #endif
 #if defined(IPQ40XX_AC58U)
 			gpio_set_value(GPIO_AC58U_POWER_LED, 0);
+#endif
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+#if defined(IPQ40XX_E2600ACC2)
+			gpio_set_value(GPIO_E2600ACC2_CTRL1_GREEN, 0);
 #endif
 			break;
 		default:
@@ -603,6 +613,11 @@ void main_loop (void)
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 		gpio_set_value(GPIO_AP4220_POWER_LED, 1);
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+#if defined(IPQ40XX_E2600ACC2)
+		gpio_set_value(GPIO_E2600ACC2_CTRL1_GREEN, 1);
+#endif
 		break;
 	default:
 		break;

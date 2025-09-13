@@ -36,6 +36,7 @@ static const char* get_board_type_string(void) {
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1: return "IPQ40XX_AP_DK01_1_S1";
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2: return "IPQ40XX_AP_DK01_1_C2";
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220: return "IPQ40XX_AP_DK01_AP4220";
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3: return "IPQ40XX_AP_DK07_1_C3";
 		default: return "Unknown";
 	}
 }
@@ -79,6 +80,10 @@ int read_firmware(void) {
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 			print_firmware_read_info("NAND", openwrt_firmware_size, openwrt_firmware_start);
 			snprintf(cmd, sizeof(cmd), "nand device 1 && nand read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+			print_firmware_read_info("NAND", openwrt_firmware_size, openwrt_firmware_start);
+			snprintf(cmd, sizeof(cmd), "nand device 0 && nand read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
 			break;
 		default:
 			printf("Error: Unsupported board type!\n");

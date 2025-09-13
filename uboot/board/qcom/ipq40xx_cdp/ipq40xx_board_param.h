@@ -601,7 +601,68 @@ gpio_func_data_t nand_gpio_dk07[] = {
 		.gpio_od_en = GPIO_OD_DISABLE,
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
-
+#if defined(IPQ40XX_E2600ACC2)
+	{
+		.gpio = 50, /* wlan0 green */
+		.func = 0,
+		.pull = GPIO_PULL_DOWN,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_DISABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 36, /* wlan1 green */
+		.func = 0,
+		.pull = GPIO_PULL_DOWN,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_DISABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 32, /* usb green */
+		.func = 0,
+		.pull = GPIO_PULL_DOWN,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_DISABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 51, /* ctrl1 */
+		.func = 0,
+		.pull = GPIO_PULL_DOWN,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_DISABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 30, /* ctrl2 */
+		.func = 0,
+		.pull = GPIO_PULL_DOWN,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_DISABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 31, /* ctrl3 */
+		.func = 0,
+		.pull = GPIO_PULL_DOWN,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_DISABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+#endif
 };
 
 gpio_func_data_t rgmii_gpio_cfg[] = {
@@ -2229,11 +2290,20 @@ board_ipq40xx_params_t board_params[] = {
 		.machid = MACH_TYPE_IPQ40XX_AP_DK07_1_C3,
 		.ddr_size = (512 << 20),
 		.console_uart_cfg = &uart1_console_uart_dk04,
+#if defined(IPQ40XX_E2600ACC2)
+		.mtdids = "nand0=nand0,nand2=spi0.0",
+#else
 		.mtdids = "nand0=nand0",
+#endif
 		.nand_gpio = nand_gpio_dk07,
 		.nand_gpio_count = ARRAY_SIZE(nand_gpio_dk07),
+#if defined(IPQ40XX_E2600ACC2)
+		.spi_nor_gpio = spi_nor_bga,
+		.spi_nor_gpio_count = ARRAY_SIZE(spi_nor_bga),
+#else
 		.sw_gpio = ap_dk07_1_c1_sw_gpio_bga,
 		.sw_gpio_count = ARRAY_SIZE(ap_dk07_1_c1_sw_gpio_bga),
+#endif
 		.edma_cfg = {
 			ipq40xx_edma_cfg(0, 5, PSGMII,
 			0, 1, 2, 3, 4)
@@ -2242,7 +2312,11 @@ board_ipq40xx_params_t board_params[] = {
 		.i2c_cfg = &i2c0,
 #endif
 		.spi_nand_available = 0,
+#if defined(IPQ40XX_E2600ACC2)
+		.nor_nand_available = 1,
+#else
 		.nor_nand_available = 0,
+#endif
 		.nor_emmc_available = 0,
 #ifdef CONFIG_IPQ40XX_PCI
 		.pcie_cfg = {
