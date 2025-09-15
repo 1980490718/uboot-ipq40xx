@@ -1,7 +1,8 @@
-#ifndef GPIO_TEST_H
-#define GPIO_TEST_H
+#ifndef _GPIO_TEST_H_
+#define _GPIO_TEST_H_
 #include <common.h>
 
+#ifdef CONFIG_GPIO_TEST
 typedef enum {
 	GPIO_TYPE_SW = 0,
 	GPIO_TYPE_NAND,
@@ -37,4 +38,5 @@ int gpio_blink_test(int gpio_num);
 const char *gpio_type_to_name(gpio_type_t type);
 gpio_type_t gpio_name_to_type(const char *name);
 
-#endif /* GPIO_TEST_H */
+#endif /* CONFIG_GPIO_TEST */
+#endif /* _GPIO_TEST_H_ */

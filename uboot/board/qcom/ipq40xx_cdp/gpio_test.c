@@ -6,6 +6,7 @@
 #include "ipq40xx_cdp.h"
 #include <linux/ctype.h>
 
+#ifdef CONFIG_GPIO_TEST
 static int gpio_monitor_running = 0;
 static const char *gpio_type_names[] = {"sw", "nand", "nor", "mmc", "uart", "pci", "rgmii", "unknown"};
 
@@ -354,3 +355,4 @@ int gpio_test_init(void) {
 	printf("GPIO test module initialized\n");
 	return 0;
 }
+#endif /* CONFIG_GPIO_TEST */
