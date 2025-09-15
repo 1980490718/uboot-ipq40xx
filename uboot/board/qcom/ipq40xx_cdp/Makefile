@@ -9,6 +9,7 @@ COBJS	+= macrw.o
 COBJS	+= ipq40xx_api.o
 COBJS	+= setenv_web.o
 COBJS	+= backup.o
+COBJS	+= gpio_test.o
 
 SRCS	:= $(COBJS:.o=.c)
 OBJS	:= $(addprefix $(obj),$(COBJS))
