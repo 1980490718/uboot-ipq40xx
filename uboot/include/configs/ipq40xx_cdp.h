@@ -269,6 +269,7 @@ typedef struct {
  * ESS Configs
  */
 #define CONFIG_GPIO_TEST
+//#define CONFIG_GPIO_TEST_CMD_LONG_HELP
 #define CONFIG_CMD_PING
 #define CONFIG_CMD_DHCP
 #define CONFIG_IPQ40XX_ESS	1
