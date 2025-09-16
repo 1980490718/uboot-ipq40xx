@@ -28,7 +28,6 @@ typedef struct {
 	int gpio_pu_res;
 } gpio_info_t;
 
-int gpio_test_init(void);
 int gpio_read_all(void);
 int gpio_read_single(int gpio_num);
 int gpio_read_by_type(const char *type_name);
