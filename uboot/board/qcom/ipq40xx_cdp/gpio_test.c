@@ -2,13 +2,42 @@
 #include <command.h>
 #include <asm/arch-ipq40xx/ess/ipq40xx_edma.h>
 #include <asm/arch-qcom-common/gpio.h>
+#include <asm/global_data.h>
 #include "gpio_test.h"
 #include "ipq40xx_cdp.h"
 #include <linux/ctype.h>
 
 #ifdef CONFIG_GPIO_TEST
+#define NUM_IPQ40XX_BOARDS 17
+
+DECLARE_GLOBAL_DATA_PTR;
+
+extern board_ipq40xx_params_t board_params[];
 static int gpio_monitor_running = 0;
 static const char *gpio_type_names[] = {"sw", "nand", "nor", "mmc", "uart", "pci", "rgmii", "unknown"};
+static const char* get_board_type_string(void) {
+	extern board_ipq40xx_params_t *gboard_param;
+	switch (gboard_param->machid) {
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1: return "AP_DK01_1_S1";
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1: return "AP_DK01_1_C1";
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2: return "AP_DK01_1_C2";
+	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220: return "AP_DK01_AP4220";
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1: return "AP_DK04_1_C1";
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C4: return "AP_DK04_1_C4";
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2: return "AP_DK04_1_C2";
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3: return "AP_DK04_1_C3";
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C5: return "AP_DK04_1_C5";
+	case MACH_TYPE_IPQ40XX_AP_DK05_1_C1: return "AP_DK05_1_C1";
+	case MACH_TYPE_IPQ40XX_AP_DK06_1_C1: return "AP_DK06_1_C1";
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1: return "AP_DK07_1_C1";
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C2: return "AP_DK07_1_C2";
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3: return "AP_DK07_1_C3";
+	case MACH_TYPE_IPQ40XX_DB_DK01_1_C1: return "DB_DK01_1_C1";
+	case MACH_TYPE_IPQ40XX_DB_DK02_1_C1: return "DB_DK02_1_C1";
+	case MACH_TYPE_IPQ40XX_TB832: return "TB832";
+	default: return "Unknown";
+	}
+}
 
 int gpio_direction_output(unsigned gpio, int value) {
 	gpio_tlmm_config(gpio, 0, 0, GPIO_NO_PULL, GPIO_2MA, GPIO_OE_ENABLE, GPIO_VM_ENABLE, GPIO_OD_DISABLE, GPIO_PULL_RES2);
@@ -58,33 +87,46 @@ static int gpio_confs(gpio_info_t *gpio_info, int *count, int max_count, gpio_fu
 	return *count;
 }
 
-static int get_gpio_configuration(gpio_info_t *gpio_info, int max_count) {
+static board_ipq40xx_params_t *get_board_param_by_machid(unsigned int machid) {
+	int i;
+	for (i = 0; i < NUM_IPQ40XX_BOARDS; i++) {
+		if (board_params[i].machid == machid) {
+			return &board_params[i];
+		}
+	}
+	return NULL;
+}
+
+static int get_gpio_configuration_for_machid(gpio_info_t *gpio_info, int max_count, unsigned int machid) {
 	int count = 0;
-	if (!gboard_param) {
-#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-		printf("Board parameters not initialized!\n");
-#endif
+	board_ipq40xx_params_t *board_param = get_board_param_by_machid(machid);
+	if (!board_param) {
+		printf("Board parameters not found for machid: 0x%x\n", machid);
 		return 0;
 	}
-	if (gboard_param->sw_gpio && gboard_param->sw_gpio_count > 0) {
-		gpio_confs(gpio_info, &count, max_count, gboard_param->sw_gpio, gboard_param->sw_gpio_count, GPIO_TYPE_SW, "sw_gpio");
+	if (board_param->sw_gpio && board_param->sw_gpio_count > 0) {
+		gpio_confs(gpio_info, &count, max_count, board_param->sw_gpio, board_param->sw_gpio_count, GPIO_TYPE_SW, "sw_gpio");
 	}
-	if (gboard_param->nand_gpio && gboard_param->nand_gpio_count > 0) {
-		gpio_confs(gpio_info, &count, max_count, gboard_param->nand_gpio, gboard_param->nand_gpio_count, GPIO_TYPE_NAND, "nand_gpio");
+	if (board_param->nand_gpio && board_param->nand_gpio_count > 0) {
+		gpio_confs(gpio_info, &count, max_count, board_param->nand_gpio, board_param->nand_gpio_count, GPIO_TYPE_NAND, "nand_gpio");
 	}
-	if (gboard_param->spi_nor_gpio && gboard_param->spi_nor_gpio_count > 0) {
-		gpio_confs(gpio_info, &count, max_count, gboard_param->spi_nor_gpio, gboard_param->spi_nor_gpio_count, GPIO_TYPE_NOR, "nor_gpio");
+	if (board_param->spi_nor_gpio && board_param->spi_nor_gpio_count > 0) {
+		gpio_confs(gpio_info, &count, max_count, board_param->spi_nor_gpio, board_param->spi_nor_gpio_count, GPIO_TYPE_NOR, "nor_gpio");
 	}
-	if (gboard_param->mmc_gpio && gboard_param->mmc_gpio_count > 0) {
-		gpio_confs(gpio_info, &count, max_count, gboard_param->mmc_gpio, gboard_param->mmc_gpio_count, GPIO_TYPE_MMC, "mmc_gpio");
+	if (board_param->mmc_gpio && board_param->mmc_gpio_count > 0) {
+		gpio_confs(gpio_info, &count, max_count, board_param->mmc_gpio, board_param->mmc_gpio_count, GPIO_TYPE_MMC, "mmc_gpio");
 	}
-	if (gboard_param->console_uart_cfg && gboard_param->console_uart_cfg->dbg_uart_gpio) {
-		gpio_confs(gpio_info, &count, max_count, gboard_param->console_uart_cfg->dbg_uart_gpio, NO_OF_DBG_UART_GPIOS, GPIO_TYPE_UART, "uart_gpio");
+	if (board_param->console_uart_cfg && board_param->console_uart_cfg->dbg_uart_gpio) {
+		gpio_confs(gpio_info, &count, max_count, board_param->console_uart_cfg->dbg_uart_gpio, NO_OF_DBG_UART_GPIOS, GPIO_TYPE_UART, "uart_gpio");
 	}
-	if (gboard_param->rgmii_gpio && gboard_param->rgmii_gpio_count > 0) {
-		gpio_confs(gpio_info, &count, max_count, gboard_param->rgmii_gpio, gboard_param->rgmii_gpio_count, GPIO_TYPE_RGMII, "rgmii_gpio");
+	if (board_param->rgmii_gpio && board_param->rgmii_gpio_count > 0) {
+		gpio_confs(gpio_info, &count, max_count, board_param->rgmii_gpio, board_param->rgmii_gpio_count, GPIO_TYPE_RGMII, "rgmii_gpio");
 	}
 	return count;
+}
+
+static int get_gpio_configuration(gpio_info_t *gpio_info, int max_count) {
+	return get_gpio_configuration_for_machid(gpio_info, max_count, gd->bd->bi_arch_number);
 }
 
 static int get_gpio_state(unsigned int gpio) {
@@ -169,6 +211,7 @@ int gpio_read_range(int start, int end) {
 	}
 	return CMD_RET_SUCCESS;
 }
+
 int gpio_read_by_type(const char *type_name) {
 	gpio_info_t gpio_info[100];
 	int count, i, value;
@@ -242,12 +285,55 @@ int gpio_read_single(int gpio_num) {
 	return CMD_RET_SUCCESS;
 }
 
+static int gpio_dump_by_machid(unsigned int machid) {
+	int i;
+	gpio_info_t gpio_info[100];
+	int count = get_gpio_configuration_for_machid(gpio_info, 100, machid);
+	const char *model_name;
+	extern board_ipq40xx_params_t *gboard_param;
+	board_ipq40xx_params_t *original_board_param = gboard_param;
+	for (i = 0; i < NUM_IPQ40XX_BOARDS; i++) {
+		if (board_params[i].machid == machid) {
+			gboard_param = &board_params[i];
+			break;
+		}
+	}
+	model_name = get_board_type_string();
+	if (count == 0) {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+		printf("No GPIO configuration found for machid: 0x%x (%s)\n", machid, model_name);
+#else
+		printf("No GPIO config for machid: 0x%x (%s)\n", machid, model_name);
+#endif
+		printf("Available machids:\n");
+		for (i = 0; i < NUM_IPQ40XX_BOARDS; i++) {
+			gboard_param = &board_params[i];
+			printf("  0x%x (%s)\n", board_params[i].machid, get_board_type_string());
+		}
+		gboard_param = original_board_param;
+		return CMD_RET_FAILURE;
+	}
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+	printf("Dumping GPIOs for machid: 0x%x (%s)\n", machid, model_name);
+#else
+	printf("Dump GPIOs: 0x%x (%s)\n", machid, model_name);
+#endif
+	gboard_param = original_board_param;
+	print_gpio_header(1);
+	for (i = 0; i < count; i++) {
+		int value = get_gpio_state(gpio_info[i].gpio_num);
+		print_gpio_line(&gpio_info[i], value, 1);
+	}
+	return CMD_RET_SUCCESS;
+}
+
 int gpio_monitor_buttons(void) {
 	int prev_values[70] = {0};
 	int curr_values[70] = {0};
 	int i, changed;
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-	printf("GPIO button monitor: range 0-69. Test reset/wps/mesh buttons - Ctrl+C to exit\n");
+	printf("GPIO button monitor: Monitoring GPIO 0-69 for button changes\n");
+	printf("Press Ctrl+C to exit\n");
 #endif
 	for (i = 0; i < 70; i++) {
 		prev_values[i] = get_gpio_state(i);
@@ -259,7 +345,7 @@ int gpio_monitor_buttons(void) {
 			curr_values[i] = get_gpio_state(i);
 			if (curr_values[i] != prev_values[i]) {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-				printf("gpio%d changed: %d -> %d\n", i, prev_values[i], curr_values[i]);
+				printf("GPIO %d changed: %d -> %d\n", i, prev_values[i], curr_values[i]);
 #endif
 				prev_values[i] = curr_values[i];
 				changed = 1;
@@ -272,7 +358,7 @@ int gpio_monitor_buttons(void) {
 		mdelay(1000);
 		if (ctrlc()) {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-			printf("\nExiting GPIO button monitor by Ctrl+C.\n");
+			printf("\nGPIO monitor stopped by user\n");
 #endif
 			gpio_monitor_running = 0;
 			break;
@@ -287,12 +373,12 @@ int gpio_write_value(int gpio_num, const char *direction, int value) {
 		ret = gpio_direction_output(gpio_num, value);
 		if (ret == 0) {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-			printf("OK: gpio%d as output with value %d\n", gpio_num, value);
+			printf("GPIO %d set as output with value %d\n", gpio_num, value);
 #endif
 		}
 		else {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-			printf("ERR: Failed to set gpio%d as output\n", gpio_num);
+			printf("Error: Failed to set GPIO %d as output\n", gpio_num);
 #endif
 			return CMD_RET_FAILURE;
 		}
@@ -301,19 +387,19 @@ int gpio_write_value(int gpio_num, const char *direction, int value) {
 		ret = gpio_direction_input(gpio_num);
 		if (ret == 0) {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-			printf("OK: Set gpio%d as input\n", gpio_num);
+			printf("GPIO %d set as input\n", gpio_num);
 #endif
 		}
 		else {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-			printf("ERR: Failed to set gpio%d as input\n", gpio_num);
+			printf("Error: Failed to set GPIO %d as input\n", gpio_num);
 #endif
 			return CMD_RET_FAILURE;
 		}
 	}
 	else {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-		printf("ERR: %s. Use 'i' or 'o'\n", direction);
+		printf("Error: Invalid direction '%s'. Use 'i' for input or 'o' for output\n", direction);
 #endif
 		return CMD_RET_FAILURE;
 	}
@@ -324,31 +410,32 @@ int gpio_blink_test(int gpio_num) {
 	int i, value, original_value;
 	original_value = get_gpio_state(gpio_num);
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-	printf("Blink test: gpio%d, 5 cycles. Ctrl+C to stop - check GPIO/LED status\n", gpio_num);
+	printf("Blink test: GPIO %d, 5 cycles\n", gpio_num);
+	printf("Press Ctrl+C to stop - check GPIO/LED status\n");
 #endif
 	if (gpio_direction_output(gpio_num, 0) != 0) {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-		printf("Failed to set gpio%d as output\n", gpio_num);
+		printf("Error: Failed to set GPIO %d as output\n", gpio_num);
 #endif
 		return CMD_RET_FAILURE;
 	}
 	for (i = 0; i < 10; i++) {
 		if (ctrlc()) {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-			printf("\nBlink test stopped by Ctrl+C.\n");
+			printf("\nBlink test stopped by user\n");
 #endif
 			break;
 		}
 		value = i % 2;
 		gpio_set_value(gpio_num, value);
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-		printf("gpio%d = %d\n", gpio_num, value);
+		printf("GPIO %d = %d\n", gpio_num, value);
 #endif
 		mdelay(500);
 	}
 	gpio_set_value(gpio_num, original_value);
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-	printf("Blink test completed. Restored gpio%d to original value %d\n", gpio_num, original_value);
+	printf("Blink test completed. Restored GPIO %d to original value %d\n", gpio_num, original_value);
 #endif
 	return CMD_RET_SUCCESS;
 }
@@ -359,6 +446,9 @@ static int do_gpio_test(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[]
 	}
 	if (strcmp(argv[1], "r") == 0) {
 		if (argc == 2) {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+			printf("Read GPIOs range from 0-69\n");
+#endif
 			return gpio_read_range(0, 69);
 		}
 		else if (argc == 3) {
@@ -366,16 +456,22 @@ static int do_gpio_test(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[]
 			if (dash) {
 				int start = simple_strtoul(argv[2], NULL, 10);
 				int end = simple_strtoul(dash + 1, NULL, 10);
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+				printf("Read GPIOs range from %d-%d\n", start, end);
+#endif
 				return gpio_read_range(start, end);
 			}
-			else if (isdigit(argv[2][0])) {
-				int gpio_num = simple_strtoul(argv[2], NULL, 10);
-				return gpio_read_single(gpio_num);
-			}
 			else if (strcmp(argv[2], "m") == 0) {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+				printf("Read all GPIOs for current model\n");
+#endif
 				return gpio_read_all();
 			}
 			else {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+				printf("Read GPIO by type: %s\n", argv[2]);
+				printf("Available types: sw, nand, nor, mmc, uart, pci, rgmii\n");
+#endif
 				return gpio_read_by_type(argv[2]);
 			}
 		}
@@ -384,6 +480,9 @@ static int do_gpio_test(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[]
 			for (i = 2; i < argc; i++) {
 				if (isdigit(argv[i][0])) {
 					int gpio_num = simple_strtoul(argv[i], NULL, 10);
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+					printf("Read single specified GPIO %d\n", gpio_num);
+#endif
 					gpio_read_single(gpio_num);
 				}
 			}
@@ -393,15 +492,38 @@ static int do_gpio_test(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[]
 	else if (strcmp(argv[1], "btn") == 0) {
 		return gpio_monitor_buttons();
 	}
+	else if (strcmp(argv[1], "d") == 0) {
+		if (argc == 3) {
+			if (strlen(argv[2]) > 2 && argv[2][0] == '0' && (argv[2][1] == 'x')) {
+				unsigned int machid = simple_strtoul(argv[2], NULL, 16);
+				return gpio_dump_by_machid(machid);
+			}
+			else {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+				printf("Usage: gpio d 0x<machid> - Dump GPIOs for specified machid (hex)\n");
+#endif
+				return CMD_RET_USAGE;
+			}
+		}
+		else {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+			printf("Usage: gpio d 0x<machid> - Dump GPIOs for specified machid (hex)\n");
+#endif
+			return CMD_RET_USAGE;
+		}
+	}
 	else if (strcmp(argv[1], "w") == 0) {
 		if (argc == 5) {
 			int gpio_num = simple_strtoul(argv[2], NULL, 10);
 			int value = simple_strtoul(argv[4], NULL, 10);
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+			printf("Write GPIO %d, direction: %s, value: %d\n", gpio_num, argv[3], value);
+#endif
 			return gpio_write_value(gpio_num, argv[3], value);
 		}
 		else {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-			printf("Usage: gpio w <n> <i|o> <0|1> - Write GPIO value (i:input, o:output.)\n");
+			printf("Usage: gpio w <gpio> <i|o> <0|1> - Set GPIO direction and value\n");
 #endif
 			return CMD_RET_USAGE;
 		}
@@ -409,18 +531,22 @@ static int do_gpio_test(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[]
 	else if (strcmp(argv[1], "b") == 0) {
 		if (argc == 3) {
 			int gpio_num = simple_strtoul(argv[2], NULL, 10);
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+			printf("Blink test: GPIO %d\n", gpio_num);
+#endif
 			return gpio_blink_test(gpio_num);
 		}
 		else {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-			printf("Usage: gpio b <n> to blink GPIO/LED test\n");
+			printf("Usage: gpio b <gpio> - Blink test for GPIO/LED\n");
 #endif
 			return CMD_RET_USAGE;
 		}
 	}
 	else {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-		printf("Unknown gpio command: %s\n", argv[1]);
+		printf("Error: Unknown command '%s'\n", argv[1]);
+		printf("Use 'help gpio' for usage information\n");
 #endif
 		return CMD_RET_USAGE;
 	}
@@ -429,16 +555,25 @@ static int do_gpio_test(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[]
 
 U_BOOT_CMD(
 	gpio, 10, 1, do_gpio_test,
-	"GPIO test commands",
-	" - Read GPIO 0-69\n"
-	"gpio r - Read GPIO 0-69\n"
-	"gpio r <n> - Read specific GPIO\n"
-	"gpio r <start>-<end> - Read GPIO range (e.g. 0-10)\n"
-	"gpio r <n1> <n2> <n3>... - Read multiple specific GPIOs\n"
-	"gpio r m[odel] - Read model configured GPIOs\n"
-	"gpio r <type> - Read GPIOs by type\n"
-	"gpio btn - Monitor GPIO buttons\n"
-	"gpio w <n> <i|o> <0|1> - Write GPIO value (i:input, o:output.)\n"
-	"gpio b <n> - Blink GPIO/LED test\n"
-	"Available types: sw, nand, nor, mmc, uart, pci, rgmii");
+	"GPIO test and configuration commands",
+	" - If no sub-command is specified, return to command [gpio r]\n"
+	"r [range|type|gpio...] - Read GPIOs\n"
+	"  r - If no sub-command is specified, default: Read GPIOs range from 0-69\n"
+	"  r <start>-<end> - Read GPIO range (e.g., 0-10)\n"
+	"  r m - Default: Read all configured GPIOs for current model\n"
+	"  r <type> - Read GPIOs by type (sw, nand, nor, mmc, uart, pci, rgmii)\n"
+	"  r <n1> <n2> <n3>... - Read specific GPIOs\n"
+	"d <machid> - Dump GPIOs for a specified machid\n"
+	"btn - Monitor GPIO buttons ranging from 0 to 69 automatically\n"
+	"w <n> <i|o> <0|1> - Set GPIO direction and value\n"
+	"b <n> - Blink test for GPIO/LED\n"
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+	"Examples:\n"
+	"  gpio r 5-10 - Read GPIOs range from 5 to 10\n"
+	"  gpio r nand - Read NAND GPIOs for current model\n"
+	"  gpio d 0x8010100 - Dump GPIOs for machid: 0x8010100\n"
+	"  gpio w 12 o 1 - Set GPIO 12 as output high\n"
+	"  gpio b 15 - Blink GPIO/LED test for GPIO 15"
+#endif
+);
 #endif /* CONFIG_GPIO_TEST */

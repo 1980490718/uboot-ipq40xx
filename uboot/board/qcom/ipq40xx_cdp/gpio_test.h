@@ -36,6 +36,7 @@ int gpio_write_value(int gpio_num, const char *direction, int value);
 int gpio_blink_test(int gpio_num);
 const char *gpio_type_to_name(gpio_type_t type);
 gpio_type_t gpio_name_to_type(const char *name);
+static int gpio_dump_by_machid(unsigned int machid);
 
 #endif /* CONFIG_GPIO_TEST */
 #endif /* _GPIO_TEST_H_ */
