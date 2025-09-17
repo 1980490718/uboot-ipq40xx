@@ -12,6 +12,7 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+static int get_gpio_config_for_machid(gpio_info_t *gpio_info, int max_count, unsigned int machid);
 extern board_ipq40xx_params_t board_params[];
 static int gpio_monitor_running = 0;
 static const char *type_names[] = {"sw", "nand", "nor", "mmc", "uart", "pci", "rgmii", "unknown"};
@@ -41,13 +42,51 @@ static const char* get_board_type_str_machid(unsigned int machid) {
 }
 
 int gpio_direction_output(unsigned gpio, int value) {
-	gpio_tlmm_config(gpio, 0, 0, GPIO_NO_PULL, GPIO_2MA, GPIO_OE_ENABLE, GPIO_VM_ENABLE, GPIO_OD_DISABLE, GPIO_PULL_RES2);
+	gpio_info_t gpio_info[100];
+	int count = get_gpio_config_for_machid(gpio_info, 100, gd->bd->bi_arch_number);
+	int found = 0;
+	int i;
+	for (i = 0; i < count; i++) {
+		if (gpio_info[i].gpio_num == gpio) {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+			printf("GPIO %d: Using board config: pull=%d, drvstr=%d, oe=%d\n", gpio, gpio_info[i].pull, gpio_info[i].drvstr, GPIO_OE_ENABLE);
+#endif
+			gpio_tlmm_config(gpio, 0, 0, gpio_info[i].pull, gpio_info[i].drvstr, GPIO_OE_ENABLE, gpio_info[i].gpio_vm, gpio_info[i].gpio_od_en, gpio_info[i].gpio_pu_res);
+			found = 1;
+			break;
+		}
+	}
+	if (!found) {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+		printf("GPIO %d: Using default output config\n", gpio);
+#endif
+		gpio_tlmm_config(gpio, 0, 0, GPIO_NO_PULL, GPIO_2MA, GPIO_OE_ENABLE, GPIO_VM_ENABLE, GPIO_OD_DISABLE, GPIO_PULL_RES2);
+	}
 	gpio_set_value(gpio, value);
 	return 0;
 }
 
 int gpio_direction_input(unsigned gpio) {
-	gpio_tlmm_config(gpio, 0, 0, GPIO_NO_PULL, GPIO_2MA, GPIO_OE_DISABLE, GPIO_VM_ENABLE, GPIO_OD_DISABLE, GPIO_PULL_RES2);
+	gpio_info_t gpio_info[100];
+	int count = get_gpio_config_for_machid(gpio_info, 100, gd->bd->bi_arch_number);
+	int found = 0;
+	int i;
+	for (i = 0; i < count; i++) {
+		if (gpio_info[i].gpio_num == gpio) {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+			printf("GPIO %d: Using board config: pull=%d, drvstr=%d, oe=%d\n", gpio, gpio_info[i].pull, gpio_info[i].drvstr, GPIO_OE_DISABLE);
+#endif
+			gpio_tlmm_config(gpio, 0, 0, gpio_info[i].pull, gpio_info[i].drvstr, GPIO_OE_DISABLE, gpio_info[i].gpio_vm, gpio_info[i].gpio_od_en, gpio_info[i].gpio_pu_res);
+			found = 1;
+			break;
+		}
+	}
+	if (!found) {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
+		printf("GPIO %d: Using default input config\n", gpio);
+#endif
+		gpio_tlmm_config(gpio, 0, 0, GPIO_NO_PULL, GPIO_2MA, GPIO_OE_DISABLE, GPIO_VM_ENABLE, GPIO_OD_DISABLE, GPIO_PULL_RES2);
+	}
 	return 0;
 }
 
@@ -85,7 +124,7 @@ static int gpio_configs(gpio_info_t *gpio_info, int *count, int max_count, gpio_
 		gpio_info[*count].type = type;
 		gpio_info[*count].type_name = type_name;
 		gpio_info[*count].func = gpio_data->func;
-		gpio_info[*count].out = gpio_data->out;
+		gpio_info[*count].out = (gpio_data->oe == GPIO_OE_ENABLE) ? 1 : 0;
 		gpio_info[*count].pull = gpio_data->pull;
 		gpio_info[*count].drvstr = gpio_data->drvstr;
 		gpio_info[*count].oe = gpio_data->oe;
