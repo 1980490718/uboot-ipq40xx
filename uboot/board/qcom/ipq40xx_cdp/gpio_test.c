@@ -15,7 +15,7 @@ DECLARE_GLOBAL_DATA_PTR;
 static int get_gpio_config_for_machid(gpio_info_t *gpio_info, int max_count, unsigned int machid);
 extern board_ipq40xx_params_t board_params[];
 static int gpio_monitor_running = 0;
-static const char *type_names[] = {"sw", "nand", "nor", "mmc", "uart", "pci", "rgmii", "unknown"};
+static const char *type_names[] = {"sw", "nand", "nor", "mmc", "uart", "pci", "rgmii", "i2c", "unknown"};
 static void print_avail_machids(void);
 
 static const char* get_board_type_str_machid(unsigned int machid) {
@@ -126,7 +126,7 @@ static int gpio_configs(gpio_info_t *gpio_info, int *count, int max_count, gpio_
 		gpio_info[*count].func = gpio_data->func;
 		gpio_info[*count].out = (gpio_data->oe == GPIO_OE_ENABLE) ? 1 : 0;
 		gpio_info[*count].pull = gpio_data->pull;
-		gpio_info[*count].drvstr = gpio_data->drvstr;
+		gpio_info[*count].drvstr = (int)gpio_data->drvstr;
 		gpio_info[*count].oe = gpio_data->oe;
 		gpio_info[*count].gpio_vm = gpio_data->gpio_vm;
 		gpio_info[*count].gpio_od_en = gpio_data->gpio_od_en;
@@ -172,6 +172,11 @@ static int get_gpio_config_for_machid(gpio_info_t *gpio_info, int max_count, uns
 	if (board_param->rgmii_gpio && board_param->rgmii_gpio_count > 0) {
 		gpio_configs(gpio_info, &count, max_count, board_param->rgmii_gpio, board_param->rgmii_gpio_count, GPIO_TYPE_RGMII, "rgmii_gpio");
 	}
+#ifdef CONFIG_IPQ40XX_I2C
+	if (board_param->i2c_cfg != NULL && board_param->i2c_cfg->i2c_gpio != NULL) {
+		gpio_configs(gpio_info, &count, max_count, board_param->i2c_cfg->i2c_gpio, 2, GPIO_TYPE_I2C, "i2c_gpio");
+	}
+#endif
 	return count;
 }
 
@@ -182,35 +187,52 @@ static int get_gpio_st(unsigned int gpio) {
 
 static void print_gpio_header(int show_type) {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-	printf("Value: 0=low, 1=high | Out: 0=in, 1=out | Pull: 0=no pull, 1=down, 2=up | OE: 0=disable, 1=enable\n");
+	printf("Value: 0=low, 1=high | Out: 0=in, 1=out | Pull: 0=no pull, 1=down, 2=up | OE: 0=disable, 1=enable | DrvStr: 0|1|2|3|4|5|6|7->2/4/6/8/10/12/14mA\n");
 #endif
 	if (show_type) {
-		printf("%-6s %-5s %-12s %-4s %-3s %-4s %-2s\n", "GPIO", "Value", "Type", "Func", "Out", "Pull", "OE");
+		printf("%-6s %-5s %-10s %-4s %-3s %-4s %-3s %-6s\n", "GPIO#", "Value", "Type", "Func", "Out", "Pull", "OE", "DrvStr");
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-		printf("%-6s %-5s %-12s %-4s %-3s %-4s %-2s\n", "----", "-----", "----", "----", "---", "----", "--");
+		printf("%-6s %-5s %-10s %-4s %-3s %-4s %-3s %-6s\n", "----", "-----", "----", "----", "---", "----", "---", "------");
 #endif
-	} else {
-		printf("%-6s %-5s %-4s %-3s %-4s %-2s\n", "GPIO", "Value", "Func", "Out", "Pull", "OE");
+	}
+	else {
+		printf("%-6s %-5s %-4s %-3s %-4s %-3s %-6s\n", "GPIO#", "Value", "Func", "Out", "Pull", "OE", "DrvStr");
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-		printf("%-6s %-5s %-4s %-3s %-4s %-2s\n", "----", "-----", "----", "---", "----", "--");
+		printf("%-6s %-5s %-4s %-3s %-4s %-3s %-6s\n", "----", "-----", "----", "---", "----", "---", "------");
 #endif
 	}
 }
 
 static void print_gpio_line(gpio_info_t *info, int value, int show_type) {
+	char short_type_name[16] = {0};
+	const char *suffix_pos;
+	if (info->type_name) {
+		suffix_pos = strstr(info->type_name, "_gpio");
+		if (suffix_pos && (suffix_pos - info->type_name) < sizeof(short_type_name)) {
+			strncpy(short_type_name, info->type_name, suffix_pos - info->type_name);
+			short_type_name[suffix_pos - info->type_name] = '\0';
+		}
+		else {
+			strncpy(short_type_name, info->type_name, sizeof(short_type_name) - 1);
+		}
+	}
+	else {
+		strcpy(short_type_name, "unknown");
+	}
 	if (show_type) {
-		printf("gpio%-4d %-5d %-12s %-4d %-3d %-4d %-2d\n",
-			info->gpio_num, value, info->type_name,
-			info->func, info->out, info->pull, info->oe);
-	} else {
-		printf("gpio%-4d %-5d %-4d %-3d %-4d %-2d\n",
+		printf("gpio%-4d %-5d %-10s %-4d %-3d %-4d %-3d %-6d\n",
+			info->gpio_num, value, short_type_name,
+			info->func, info->out, info->pull, info->oe, info->drvstr);
+	}
+	else {
+		printf("gpio%-4d %-5d %-4d %-3d %-4d %-3d %-6d\n",
 			info->gpio_num, value,
-			info->func, info->out, info->pull, info->oe);
+			info->func, info->out, info->pull, info->oe, info->drvstr);
 	}
 }
 
 static void print_gpio_def_info(int gpio_num, int value, int show_config) {
-	gpio_info_t temp_info = {.gpio_num = gpio_num, .type = GPIO_TYPE_UNKNOWN, .func = 0, .out = 0, .pull = 0, .oe = 0};
+	gpio_info_t temp_info = {.gpio_num = gpio_num, .type = GPIO_TYPE_UNKNOWN, .type_name = "unknown", .func = 0, .out = 0, .pull = 0, .oe = 0, .drvstr = 0};
 	print_gpio_line(&temp_info, value, show_config);
 }
 
@@ -292,7 +314,7 @@ int read_type(const char *type_name) {
 	}
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
 	printf("Read GPIO for machid: 0x%x -> %s by type: %s\n", machid, model, type_names[type]);
-	printf("Available types: sw, nand, nor, mmc, uart, pci, rgmii\n");
+	printf("Available types: sw, nand, nor, mmc, uart, pci, rgmii, i2c\n");
 #endif
 	print_gpio_header(0);
 	for (i = 0; i < count; i++) {
@@ -586,7 +608,7 @@ U_BOOT_CMD(
 	"  r - If no sub-command is specified, default: Read GPIOs range from 0-69\n"
 	"  r <start>-<end> - Read GPIO range (e.g., 0-10)\n"
 	"  r m - Read all definitions of the GPIOs for the current model\n"
-	"  r <type> - Read GPIOs by type (sw, nand, nor, mmc, uart, pci, rgmii)\n"
+	"  r <type> - Read GPIOs by type (sw, nand, nor, mmc, uart, pci, rgmii, i2c)\n"
 	"d <machid> - Dump GPIOs for a specified machid (hex number)\n"
 	"m - List all available machids\n"
 #endif

@@ -11,6 +11,7 @@ typedef enum {
 	GPIO_TYPE_UART,
 	GPIO_TYPE_PCI,
 	GPIO_TYPE_RGMII,
+	GPIO_TYPE_I2C,
 	GPIO_TYPE_UNKNOWN
 } gpio_type_t;
 
