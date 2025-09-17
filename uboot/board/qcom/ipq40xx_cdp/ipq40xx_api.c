@@ -579,7 +579,7 @@ U_BOOT_CMD(
 	"\n    Starts the failsafe web interface for firmware upgrade."
 );
 #endif
-#ifdef CONFIG_GPIO_DEBUG
+#ifdef CONFIG_GPIO_BOOTING_DEBUG
 void print_gpio_values(void) {
 	int i;
 	int gpio_value;
@@ -615,4 +615,4 @@ void print_gpio_values(void) {
 		}
 	}
 }
-#endif
+#endif /* CONFIG_GPIO_BOOTING_DEBUG */

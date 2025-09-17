@@ -102,7 +102,7 @@ qca_mmc mmc_host;
 #endif
 
 extern int spi_nand_init(void);
-#ifdef CONFIG_GPIO_DEBUG
+#ifdef CONFIG_GPIO_BOOTING_DEBUG
 extern void print_gpio_values(void);
 #endif
 
@@ -368,7 +368,7 @@ int board_late_init(void)
 		setenv_addr("machid", (void *)machid);
 		gd->bd->bi_arch_number = machid;
 	}
-#ifdef CONFIG_GPIO_DEBUG
+#ifdef CONFIG_GPIO_BOOTING_DEBUG
 	print_gpio_values();
 #endif
 	return 0;
