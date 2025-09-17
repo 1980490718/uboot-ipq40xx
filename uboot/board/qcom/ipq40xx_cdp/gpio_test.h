@@ -28,15 +28,15 @@ typedef struct {
 	int gpio_pu_res;
 } gpio_info_t;
 
-int gpio_read_all(void);
-int gpio_read_single(int gpio_num);
-int gpio_read_by_type(const char *type_name);
-int gpio_monitor_buttons(void);
-int gpio_write_value(int gpio_num, const char *direction, int value);
-int gpio_blink_test(int gpio_num);
-const char *gpio_type_to_name(gpio_type_t type);
-gpio_type_t gpio_name_to_type(const char *name);
-static int gpio_dump_by_machid(unsigned int machid);
+int read_all(void);
+int read_single(int gpio_num);
+int read_type(const char *type_name);
+int monitor_btns(void);
+int write_val(int gpio_num, const char *direction, int value);
+int blink(int gpio_num);
+const char *type_name(gpio_type_t type);
+gpio_type_t name_to_type(const char *name);
+static int dump_machid(unsigned int machid);
 
 #endif /* CONFIG_GPIO_TEST */
 #endif /* _GPIO_TEST_H_ */
