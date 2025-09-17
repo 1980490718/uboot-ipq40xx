@@ -21,6 +21,7 @@
 *.patch
 *.cfgtmp
 *.log
+*.txt
 
 # host programs on Cygwin
 *.exe
