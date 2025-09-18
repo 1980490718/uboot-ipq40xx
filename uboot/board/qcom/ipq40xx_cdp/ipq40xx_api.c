@@ -352,7 +352,9 @@ void board_names_init()
 		led_upgrade_write_flashing_2=GPIO_S1300_WIFI_LED;
 		led_upgrade_erase_flashing=GPIO_S1300_WIFI_LED;
 #endif
+#ifdef CONFIG_QCA_MMC
 		get_mmc_part_info();
+#endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
 		openwrt_firmware_start=0x180000;
@@ -385,7 +387,9 @@ void board_names_init()
 		led_upgrade_erase_flashing=GPIO_B2200_POWER_BLUE_LED;
 		power_led_active_low=0;
 #endif
+#ifdef CONFIG_QCA_MMC
 		get_mmc_part_info();
+#endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 		openwrt_firmware_start=0x0;
@@ -557,7 +561,6 @@ void board_names_init()
 }
 #ifdef CONFIG_QCA_MMC
 static qca_mmc *host = &mmc_host;
-#endif
 void get_mmc_part_info() {
 	block_dev_desc_t *blk_dev;
 	blk_dev = mmc_get_dev(host->dev_num);
@@ -567,6 +570,10 @@ void get_mmc_part_info() {
 		printf("\n\n");
 	}
 }
+#else
+void get_mmc_part_info() {
+}
+#endif
 #ifdef CONFIG_HTTPD
 int do_httpd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {

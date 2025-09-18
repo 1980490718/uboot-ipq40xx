@@ -186,12 +186,16 @@ int env_init(void)
 
 	if (sfi.flash_type != SMEM_BOOT_MMC_FLASH) {
 		ret = nand_env_init();
-#ifdef CONFIG_QCA_MMC
-	} else {
-		ret = mmc_env_init();
-#endif
 	}
-
+#ifdef CONFIG_QCA_MMC
+	else {
+		ret = mmc_env_init();
+	}
+#else
+	else {
+		ret = 0;
+	}
+#endif
 	return ret;
 }
 
