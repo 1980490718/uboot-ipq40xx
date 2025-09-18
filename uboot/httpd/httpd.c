@@ -21,17 +21,17 @@
 #define STATE_UPLOAD_REQUEST	2		// remote host sent POST request
 
 // ASCII characters
-#define ISO_G					0x47	// GET
-#define ISO_E					0x45
-#define ISO_P					0x50	// POST
-#define ISO_O					0x4f
-#define ISO_S					0x53
-#define ISO_T					0x54
-#define ISO_slash				0x2f	// control and other characters
-#define ISO_space				0x20
-#define ISO_nl					0x0a
-#define ISO_cr					0x0d
-#define ISO_tab				0x09
+#define ISO_G		0x47	// GET
+#define ISO_E		0x45
+#define ISO_P		0x50	// POST
+#define ISO_O		0x4f
+#define ISO_S		0x53
+#define ISO_T		0x54
+#define ISO_slash	0x2f	// control and other characters
+#define ISO_space	0x20
+#define ISO_nl		0x0a
+#define ISO_cr		0x0d
+#define ISO_tab		0x09
 
 // we use this so that we can do without the ctype library
 #define is_digit(c)				((c) >= '0' && (c) <= '9')
@@ -145,33 +145,18 @@ static int httpd_findandstore_firstchunk(void) {
 		} else {
 			end = (char *)strstr((char *)start, "name=\"uboot\"");
 			if (end) {
-#if defined(WEBFAILSAFE_DISABLE_UBOOT_UPGRADE)
-				printf("## Error: U-Boot upgrade is not allowed on this board!\n");
-				webfailsafe_upload_failed = 1;
-#else
 				webfailsafe_upgrade_type = WEBFAILSAFE_UPGRADE_TYPE_UBOOT;
 				printf("Upgrade type: U-Boot\n");
-#endif
 			} else {
 				end = (char *)strstr((char *)start, "name=\"art\"");
 				if(end){
-#if defined(WEBFAILSAFE_DISABLE_ART_UPGRADE)
-					printf("## Error: U-Boot upgrade is not allowed on this board!\n");
-					webfailsafe_upload_failed = 1;
-#else
 					printf("Upgrade type: ART\n");
 					webfailsafe_upgrade_type = WEBFAILSAFE_UPGRADE_TYPE_ART;
-#endif
 				} else {
 					end = (char *)strstr((char *)start, "name=\"mibib\"");
 					if(end){
-#if defined(WEBFAILSAFE_DISABLE_MIBIB_UPGRADE)
-						printf("## Error: MIBIB upgrade is not allowed on this board!\n");
-						webfailsafe_upload_failed = 1;
-#else
 						printf("Upgrade type: MIBIB\n");
 						webfailsafe_upgrade_type = WEBFAILSAFE_UPGRADE_TYPE_MIBIB;
-#endif
 					} else {
 						printf("## Error: input name not found!\n");
 						return(0);
