@@ -27,15 +27,16 @@
 #include <linux/mtd/partitions.h>
 #include <linux/mtd/mtd.h>
 #include <linux/err.h>
+#include <ipq40xx_api.h>
 
 #define MAC_LEN_IN_BYTE		6
 #define MAX_MAC_STR_LEN		32
 #define CMD_BUF_SIZE		128
-#define DEFAULT_ART_OFFSET	0x170000
-#define DEFAULT_ART_SIZE	0x10000
 #define WIFI_CHECKSUM_SIZE	12064
 
-#define ART_LOAD_ADDR		0x88000000
+#define DEFAULT_ART_OFFSET	CONFIG_ART_START
+#define DEFAULT_ART_SIZE	CONFIG_ART_SIZE
+#define ART_LOAD_ADDR		WEBFAILSAFE_UPLOAD_RAM_ADDRESS
 
 #define WIFI0_BASE		(ART_LOAD_ADDR + 0x1000)
 #define WIFI1_BASE		(ART_LOAD_ADDR + 0x5000)
