@@ -161,7 +161,9 @@ static int get_gpio_config_for_machid(gpio_info_t *gpio_info, int max_count, uns
 
 static int get_gpio_st(unsigned int gpio) {
 	unsigned int val = gpio_get_value(gpio);
-	return val & 0x1;
+	int out_val = (val >> 1) & 0x1;
+	int in_val = val & 0x1;
+	return (out_val != 0) ? out_val : in_val;
 }
 
 static void print_gpio_header(int show_type) {
