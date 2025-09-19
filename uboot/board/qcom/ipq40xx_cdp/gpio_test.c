@@ -6,6 +6,8 @@
 #include "gpio_test.h"
 #include "ipq40xx_cdp.h"
 #include <linux/ctype.h>
+#include <../../../arch/arm/include/asm/mach-types.h>
+#include "ipq40xx_api.h"
 
 #ifdef CONFIG_GPIO_TEST
 #define NUM_IPQ40XX_BOARDS 17
@@ -17,29 +19,6 @@ extern board_ipq40xx_params_t board_params[];
 static int gpio_monitor_running = 0;
 static const char *type_names[] = {"sw", "nand", "nor", "mmc", "uart", "pci", "rgmii", "i2c", "unknown"};
 static void print_avail_machids(void);
-
-static const char* get_board_type_str_machid(unsigned int machid) {
-	switch (machid) {
-	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1: return "AP_DK01_1_S1";
-	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1: return "AP_DK01_1_C1";
-	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2: return "AP_DK01_1_C2";
-	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220: return "AP_DK01_AP4220";
-	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1: return "AP_DK04_1_C1";
-	case MACH_TYPE_IPQ40XX_AP_DK04_1_C4: return "AP_DK04_1_C4";
-	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2: return "AP_DK04_1_C2";
-	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3: return "AP_DK04_1_C3";
-	case MACH_TYPE_IPQ40XX_AP_DK04_1_C5: return "AP_DK04_1_C5";
-	case MACH_TYPE_IPQ40XX_AP_DK05_1_C1: return "AP_DK05_1_C1";
-	case MACH_TYPE_IPQ40XX_AP_DK06_1_C1: return "AP_DK06_1_C1";
-	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1: return "AP_DK07_1_C1";
-	case MACH_TYPE_IPQ40XX_AP_DK07_1_C2: return "AP_DK07_1_C2";
-	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3: return "AP_DK07_1_C3";
-	case MACH_TYPE_IPQ40XX_DB_DK01_1_C1: return "DB_DK01_1_C1";
-	case MACH_TYPE_IPQ40XX_DB_DK02_1_C1: return "DB_DK02_1_C1";
-	case MACH_TYPE_IPQ40XX_TB832: return "TB832";
-	default: return "Unknown";
-	}
-}
 
 int gpio_direction_output(unsigned gpio, int value) {
 	gpio_info_t gpio_info[100];

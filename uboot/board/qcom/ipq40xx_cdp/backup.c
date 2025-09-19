@@ -28,20 +28,7 @@ static void format_size_string(char *buffer, size_t buffer_size, unsigned int si
 		snprintf(buffer, buffer_size, "%u bytes", size);
 	}
 }
-static const char* get_board_type_string(void) {
-	switch (gboard_param->machid) {
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1: return "IPQ40XX_AP_DK04_1_C1";
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2: return "IPQ40XX_AP_DK04_1_C2";
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3: return "IPQ40XX_AP_DK04_1_C3";
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1: return "IPQ40XX_AP_DK01_1_C1";
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1: return "IPQ40XX_AP_DK01_1_S1";
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2: return "IPQ40XX_AP_DK01_1_C2";
-		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220: return "IPQ40XX_AP_DK01_AP4220";
-		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1: return "IPQ40XX_AP_DK07_1_C1";
-		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3: return "IPQ40XX_AP_DK07_1_C3";
-		default: return "Unknown";
-	}
-}
+
 // Global variables for web interface
 static int firmware_loaded_to_ram = 0;
 static unsigned int last_firmware_size = 0;
@@ -96,7 +83,7 @@ int read_firmware(void) {
 	printf("Reading firmware to RAM... ");
 	int ret = run_command(cmd, 0);
 	if (ret == 0) {
-		printf("Board Type: %s\n", get_board_type_string());
+		printf("Board Type: %s\n", get_board_type_str_machid(gboard_param->machid));
 		printf("Success: Read 0x%x-0x%x to RAM at 0x88000000\n", openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1);
 		char size_str[64];
 		format_size_string(size_str, sizeof(size_str), openwrt_firmware_size);
@@ -176,7 +163,7 @@ int web_handle_read(char *response_buffer, size_t buffer_size) {
 			size_str, firmware_loaded_to_ram ? last_firmware_start : openwrt_firmware_start,
 			(firmware_loaded_to_ram ? last_firmware_start : openwrt_firmware_start) +
 			(firmware_loaded_to_ram ? last_firmware_size : openwrt_firmware_size) - 1,
-			get_board_type_string(), fw_type_str
+			get_board_type_str_machid(gboard_param->machid), fw_type_str
 		);
 	} else {
 		snprintf(response_buffer, buffer_size,

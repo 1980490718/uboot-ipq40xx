@@ -285,6 +285,7 @@ extern int flashing_power_led;
 extern int power_led_active_low;
 extern int dos_boot_part_lba_start, dos_boot_part_size, dos_third_part_lba_start;
 void board_names_init(void);
+const char* get_board_type_str_machid(unsigned int machid);
 #endif /* __ASSEMBLY__ */
 
 #endif /* IPQ40XX_API_H */

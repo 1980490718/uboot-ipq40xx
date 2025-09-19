@@ -11,6 +11,29 @@
 void get_mmc_part_info(void);
 void HttpdLoop(void);
 
+const char* get_board_type_str_machid(unsigned int machid) {
+	switch (machid) {
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1: return "AP_DK01_1_S1";		//0x8010200
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1: return "AP_DK01_1_C1";		//0x8010000
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2: return "AP_DK01_1_C2";		//0x8010100
+	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220: return "AP_DK01_AP4220";	//0x9000010
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1: return "AP_DK04_1_C1";		//0x8010001
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C4: return "AP_DK04_1_C4";		//0x8010301
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2: return "AP_DK04_1_C2";		//0x8010101
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3: return "AP_DK04_1_C3";		//0x8010201
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C5: return "AP_DK04_1_C5";		//0x8010401
+	case MACH_TYPE_IPQ40XX_AP_DK05_1_C1: return "AP_DK05_1_C1";		//0x8010007
+	case MACH_TYPE_IPQ40XX_AP_DK06_1_C1: return "AP_DK06_1_C1";		//0x8010005
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1: return "AP_DK07_1_C1";		//0x8010006
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C2: return "AP_DK07_1_C2";		//0x8010106
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3: return "AP_DK07_1_C3";		//0x8010206
+	case MACH_TYPE_IPQ40XX_DB_DK01_1_C1: return "DB_DK01_1_C1";		//0x1010002
+	case MACH_TYPE_IPQ40XX_DB_DK02_1_C1: return "DB_DK02_1_C1";		//0x1010003
+	case MACH_TYPE_IPQ40XX_TB832: return "TB832";					//0x1010004
+	default: return "Unknown";
+	}
+}
+
 unsigned long hex2int(const char *a, unsigned int len) {
 	unsigned long val = 0;
 	unsigned int i;
