@@ -166,7 +166,7 @@ static int get_gpio_st(unsigned int gpio) {
 
 static void print_gpio_header(int show_type) {
 #ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
-	printf("Value: 0=low, 1=high | Out: 0=in, 1=out | Pull: 0=no pull, 1=down, 2=up | OE: 0=disable, 1=enable | DrvStr: 0|1|2|3|4|5|6|7->2/4/6/8/10/12/14mA\n");
+	printf("Value: 0=low, 1=high | Out: 0=in, 1=out\nPull: 0=no pull, 1=down, 2=up | OE: 0=disable, 1=enable\nDrvStr: 0|1|2|3|4|5|6|7->2/4/6/8/10/12/14mA\n");
 #endif
 	if (show_type) {
 		printf("%-6s %-5s %-10s %-4s %-3s %-4s %-3s %-6s\n", "GPIO#", "Value", "Type", "Func", "Out", "Pull", "OE", "DrvStr");
@@ -437,21 +437,21 @@ int write_val(int gpio_num, const char *direction, int value) {
 			printf("GPIO %d set as input\n", gpio_num);
 #endif
 		}
-#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
 		else {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
 			printf("Error: Failed to set GPIO %d as input\n", gpio_num);
+#endif
 			return CMD_RET_FAILURE;
 		}
-#endif
-#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
 	}
 	else {
+#ifdef CONFIG_GPIO_TEST_CMD_LONG_HELP
 		printf("Error: Invalid direction '%s'. Use 'i' for input or 'o' for output\n", direction);
-		return CMD_RET_FAILURE;
 #else
 		printf("Error");
-	}
 #endif
+		return CMD_RET_FAILURE;
+	}
 	return CMD_RET_SUCCESS;
 }
 
@@ -577,6 +577,12 @@ static int do_gpio_test(cmd_tbl_t *cmdtbl, int flag, int argc, char *const argv[
 	}
 	return CMD_RET_SUCCESS;
 }
+
+#ifdef CONFIG_DUMP_GPIO
+int dump_current_model_gpio(void) {
+	return read_all();
+}
+#endif
 
 U_BOOT_CMD(
 	gpio, 10, 1, do_gpio_test,

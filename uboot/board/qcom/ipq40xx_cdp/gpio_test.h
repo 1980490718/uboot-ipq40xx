@@ -38,6 +38,9 @@ int blink(int gpio_num);
 const char *type_name(gpio_type_t type);
 gpio_type_t name_to_type(const char *name);
 static int dump_machid(unsigned int machid);
+#ifdef CONFIG_DUMP_GPIO
+extern int dump_current_model_gpio(void);
+#endif
 
 #endif /* CONFIG_GPIO_TEST */
 #endif /* _GPIO_TEST_H_ */
