@@ -17,10 +17,8 @@
 static int arptimer = 0;
 extern int	webfailsafe_is_running;
 extern void NetSendHttpd(void);
-void HttpdHandler( void )
-{
+void HttpdHandler( void ) {
 	int i;
-	
 	if ( uip_len == 0 ) {
 		for ( i = 0; i < UIP_CONNS; i++ ) {
 			uip_periodic( i );
@@ -33,7 +31,8 @@ void HttpdHandler( void )
 			uip_arp_timer();
 			arptimer = 0;
 		}
-	} else {
+	}
+	else {
 		//printf("uip_len = %d\n", uip_len);
 		if ( BUF->type == htons( UIP_ETHTYPE_IP ) ) {
 			uip_arp_ipin();
@@ -55,20 +54,26 @@ void HttpdStart( void ) {
 	uip_init();
 	httpd_init();
 }
+
+static void print_upgrade_header(const char *upgrade_type_name) {
+	printf("\n****************************\n* %-22s *\n* DO NOT POWER OFF DEVICE! *\n****************************\n", upgrade_type_name);
+}
+
 extern int do_checkout_firmware(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]);
 int fw_type;
 int do_http_upgrade( const ulong size, const int upgrade_type ) {
 	char cmd[128] = {0};
 	if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_UBOOT ) {
-		printf( "\n****************************\n*     U-BOOT UPGRADING     *\n* DO NOT POWER OFF DEVICE! *\n****************************\n" );
-		sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x88000000 0x%x 0x%lx", 
-			CONFIG_UBOOT_START, CONFIG_UBOOT_SIZE, CONFIG_UBOOT_START, size);
+		print_upgrade_header("    U-BOOT UPGRADING    ");
+		sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x%x 0x%x 0x%lx",
+			CONFIG_UBOOT_START, CONFIG_UBOOT_SIZE, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, CONFIG_UBOOT_START, size);
 		if(size > CONFIG_UBOOT_SIZE)
 			return 0;
 		run_command(cmd, 0);
 		return 0;
-	} else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_FIRMWARE || upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_QSDK_FIRMWARE ) {
-		printf( "\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n" );
+	}
+	else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_FIRMWARE || upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_QSDK_FIRMWARE ) {
+		print_upgrade_header("   FIRMWARE UPGRADING   ");
 		fw_type=do_checkout_firmware(NULL, 0, 0, NULL);
 		if ( fw_type == FW_TYPE_OPENWRT ) {
 			switch (gboard_param->machid) {
@@ -80,66 +85,67 @@ int do_http_upgrade( const ulong size, const int upgrade_type ) {
 				case MACH_TYPE_IPQ40XX_DB_DK01_1_C1:
 				case MACH_TYPE_IPQ40XX_DB_DK02_1_C1:
 				case MACH_TYPE_IPQ40XX_TB832:
-					if(size > openwrt_firmware_size){
+					if(size > openwrt_firmware_size) {
 						printf("Firmware oversize! Not flashing.\n");
 						return 0;
 					}
-					sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x88000000 0x%x 0x%lx",
-						openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start, size);
+					sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x%x 0x%x 0x%lx",
+						openwrt_firmware_start, openwrt_firmware_size, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_start, size);
 					break;
 				case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C5:
 				case MACH_TYPE_IPQ40XX_AP_DK05_1_C1:
 				case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
-					sprintf(cmd, "nand device 1 && nand erase 0x%x 0x%x && nand write 0x88000000 0x%x 0x%lx",
-						openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start, size);
+					sprintf(cmd, "nand device 1 && nand erase 0x%x 0x%x && nand write 0x%x 0x%x 0x%lx",
+						openwrt_firmware_start, openwrt_firmware_size, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_start, size);
 					break;
 				case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
 				case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
-					sprintf(cmd, "nand device 0 && nand erase 0x%x 0x%x && nand write 0x88000000 0x%x 0x%lx",
-						openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start, size);
+					sprintf(cmd, "nand device 0 && nand erase 0x%x 0x%x && nand write 0x%x 0x%x 0x%lx",
+						openwrt_firmware_start, openwrt_firmware_size, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_start, size);
 					break;
 				default:
 					break;
 			}
-		}else if (fw_type == FW_TYPE_OPENWRT_EMMC){
+		}
+		else if (fw_type == FW_TYPE_OPENWRT_EMMC) {
 			switch (gboard_param->machid) {
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
 				case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 					//erase 531MB, defealt partion 16MB kernel + 512MB rootfs
-					sprintf(cmd, "mmc erase 0x0 0x109800 && mmc write 0x88000000 0x0 0x%lx", (unsigned long int)(size/512+1));
+					sprintf(cmd, "mmc erase 0x0 0x109800 && mmc write 0x%x 0x0 0x%lx", WEBFAILSAFE_UPLOAD_RAM_ADDRESS, (unsigned long int)(size/512+1));
 					printf("%s\n", cmd);
 					break;
 				default:
 					break;
 			}
-		}else {
-			sprintf(cmd, "sf probe && imgaddr=0x88000000 && source $imgaddr:script");
+		}
+		else {
+			sprintf(cmd, "sf probe && imgaddr=0x%x && source $imgaddr:script", WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
 		}
 		run_command(cmd, 0);
 		return 0;
-		
-	} else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_ART ) {
-		printf( "\n****************************\n*      ART UPGRADING       *\n* DO NOT POWER OFF DEVICE! *\n****************************\n" );
-#if defined(IPQ40XX_ENS620EXT)
-		sprintf(cmd, "sf probe && sf erase 0x180000 0x10000 && sf write 0x88000000 0x180000 0x10000");
-#else
-		sprintf(cmd, "sf probe && sf erase 0x170000 0x10000 && sf write 0x88000000 0x170000 0x10000");
-#endif
+	}
+	else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_ART ) {
+		print_upgrade_header("     ART UPGRADING      ");
+		sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x%x 0x%x 0x%lx", CONFIG_ART_START,CONFIG_ART_SIZE, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, CONFIG_ART_START, size);
 		run_command(cmd, 0);
 		return 0;
-	} else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_MIBIB ) {
-		printf( "\n****************************\n*      MIBIB UPGRADING     *\n* DO NOT POWER OFF DEVICE! *\n****************************\n" );
-		sprintf(cmd, "sf probe && sf erase 0x40000 0x20000 && sf write 0x88000000 0x40000 0x20000");
+	}
+	else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_MIBIB ) {
+		print_upgrade_header("     MIBIB UPGRADING    ");
+		sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x%x 0x%x 0x%lx", CONFIG_MIBIB_START,CONFIG_MIBIB_SIZE, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, CONFIG_MIBIB_START, size);
 		run_command(cmd, 0);
 		return 0;
-	} else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_QSDK_FIRMWARE ) {
-		printf( "\n****************************\n*      FIRMWARE UPGRADING      *\n* DO NOT POWER OFF DEVICE! *\n****************************\n" );
-		sprintf(cmd, "imgaddr=0x88000000 && source $imgaddr:script");
+	}
+	else if ( upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_QSDK_FIRMWARE ) {
+		print_upgrade_header("     FIRMWARE UPGRADING      ");
+		sprintf(cmd, "imgaddr=0x%x && source $imgaddr:script", WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
 		run_command(cmd, 0);
 		return 0;
-	}else {
+	}
+	else {
 		return(-1);
 	}
 	return(-1);
