@@ -57,55 +57,100 @@ int do_checkout_firmware(void) {
 	}
 	return FW_TYPE_OPENWRT;
 }
-int upgrade(void) {
+static void print_upgrade_header(const char *upgrade_type_name) {
+	printf("\n****************************\n* %-22s *\n* DO NOT POWER OFF DEVICE! *\n****************************\n", upgrade_type_name);
+}
+
+int do_http_upgrade(const ulong size, const int upgrade_type) {
 	char cmd[128] = {0};
 	int fw_type = do_checkout_firmware();
-	const char *filesize = getenv("filesize");
-	unsigned long file_size = filesize ? hex2int(filesize, strlen(filesize)) : 0;
-	switch (gboard_param->machid) {
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
-			if (fw_type == FW_TYPE_OPENWRT_EMMC) {
-				snprintf(cmd, sizeof(cmd),
-					"mmc erase 0x0 0x109800 && mmc write 0x88000000 0x0 0x%lx",
-					(hex2int(getenv("filesize"), strlen(getenv("filesize"))) + 511) / 512);
-			} else {
-				snprintf(cmd, sizeof(cmd),
-					"sf probe && sf erase 0x%x 0x%x && sf write 0x88000000 0x%x $filesize",
-					openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start);
-			}
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
-		case MACH_TYPE_IPQ40XX_DB_DK01_1_C1:
-		case MACH_TYPE_IPQ40XX_DB_DK02_1_C1:
-		case MACH_TYPE_IPQ40XX_TB832:
-			if (file_size >= openwrt_firmware_size) {
-				printf("Firmware too large! Not flashing.\n");
-				return 0;
-			}
-			snprintf(cmd, sizeof(cmd), 
-				"sf probe && sf erase 0x%x 0x%x && sf write 0x88000000 0x%x $filesize",
-				openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start);
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C5:
-		case MACH_TYPE_IPQ40XX_AP_DK05_1_C1:
-		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
-			snprintf(cmd, sizeof(cmd),
-				"nand device 1 && nand erase 0x%x 0x%x && nand write 0x88000000 0x%x $filesize",
-				openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start);
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
-		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
-			snprintf(cmd, sizeof(cmd),
-				"nand device 0 && nand erase 0x%x 0x%x && nand write 0x88000000 0x%x $filesize",
-				openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start);
-			break;
+	if (upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_UBOOT) {
+		print_upgrade_header("    U-BOOT UPGRADING    ");
+		sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x%x 0x%x 0x%lx",
+				CONFIG_UBOOT_START, CONFIG_UBOOT_SIZE, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, CONFIG_UBOOT_START, size);
+		if (size > CONFIG_UBOOT_SIZE)
+			return 0;
+		run_command(cmd, 0);
+		return 0;
 	}
-	return run_command(cmd, 0);
+	else if (upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_FIRMWARE || upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_QSDK_FIRMWARE) {
+		print_upgrade_header("   FIRMWARE UPGRADING   ");
+		if (fw_type == FW_TYPE_OPENWRT) {
+			switch (gboard_param->machid) {
+			case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+			case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+			case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+			case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+			case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
+			case MACH_TYPE_IPQ40XX_DB_DK01_1_C1:
+			case MACH_TYPE_IPQ40XX_DB_DK02_1_C1:
+			case MACH_TYPE_IPQ40XX_TB832:
+				if (size > openwrt_firmware_size) {
+					printf("Firmware oversize! Not flashing.\n");
+					return 0;
+				}
+				sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x%x 0x%x 0x%lx",
+						openwrt_firmware_start, openwrt_firmware_size, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_start, size);
+				break;
+			case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+			case MACH_TYPE_IPQ40XX_AP_DK04_1_C5:
+			case MACH_TYPE_IPQ40XX_AP_DK05_1_C1:
+			case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
+				sprintf(cmd, "nand device 1 && nand erase 0x%x 0x%x && nand write 0x%x 0x%x 0x%lx",
+						openwrt_firmware_start, openwrt_firmware_size, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_start, size);
+				break;
+			case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+			case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+				sprintf(cmd, "nand device 0 && nand erase 0x%x 0x%x && nand write 0x%x 0x%x 0x%lx",
+						openwrt_firmware_start, openwrt_firmware_size, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_start, size);
+				break;
+			default:
+				break;
+			}
+		}
+		else if (fw_type == FW_TYPE_OPENWRT_EMMC) {
+			switch (gboard_param->machid) {
+			case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+			case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+			case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+				// erase 531MB, defealt partion 16MB kernel + 512MB rootfs
+				sprintf(cmd, "mmc erase 0x0 0x109800 && mmc write 0x%x 0x0 0x%lx", WEBFAILSAFE_UPLOAD_RAM_ADDRESS, (unsigned long int)(size / 512 + 1));
+				printf("%s\n", cmd);
+				break;
+			default:
+				break;
+			}
+		}
+		else {
+			sprintf(cmd, "sf probe && imgaddr=0x%x && source $imgaddr:script", WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
+		}
+		run_command(cmd, 0);
+		return 0;
+	}
+	else if (upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_ART) {
+		print_upgrade_header("     ART UPGRADING      ");
+		sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x%x 0x%x 0x%lx", CONFIG_ART_START, CONFIG_ART_SIZE, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, CONFIG_ART_START, size);
+		run_command(cmd, 0);
+		return 0;
+	}
+	else if (upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_MIBIB) {
+		print_upgrade_header("     MIBIB UPGRADING    ");
+		sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x%x 0x%x 0x%lx", CONFIG_MIBIB_START, CONFIG_MIBIB_SIZE, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, CONFIG_MIBIB_START, size);
+		run_command(cmd, 0);
+		return 0;
+	}
+	else if (upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_QSDK_FIRMWARE) {
+		print_upgrade_header("     FIRMWARE UPGRADING      ");
+		sprintf(cmd, "imgaddr=0x%x && source $imgaddr:script", WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
+		run_command(cmd, 0);
+		return 0;
+	}
+	else {
+		return (-1);
+	}
+	return (-1);
 }
+
 void LED_INIT(void) {
 	switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
