@@ -4,6 +4,7 @@
 
 #ifndef _IPQ40XX_EX61X0V2_H
 #define _IPQ40XX_EX61X0V2_H
+#define IPQ40XX_EX61X0V2 1
 
 #include <configs/ipq40xx_cdp.h>
 #include <ipq40xx_api.h>

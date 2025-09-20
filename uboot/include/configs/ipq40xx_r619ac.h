@@ -4,6 +4,7 @@
 
 #ifndef _IPQ40XX_R619AC_H
 #define _IPQ40XX_R619AC_H
+#define IPQ40XX_R619AC 1
 
 #define MTDIDS              "nand0=nand0"
 #define MTDPARTS            "mtdparts=nand0:-(rootfs)"

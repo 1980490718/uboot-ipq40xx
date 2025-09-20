@@ -54,7 +54,9 @@
 #define CONFIG_SYS_HZ			1000
 #define CONFIG_SYS_VSNPRINTF
 
+#if !defined(IPQ40XX_FOGPOD502)
 #define CONFIG_IPQ40XX_USB
+#endif
 #ifdef CONFIG_IPQ40XX_USB
 #define CONFIG_USB_XHCI
 #define CONFIG_CMD_USB
@@ -307,7 +309,26 @@ typedef struct {
 #define CONFIG_SYS_MAX_NAND_DEVICE	(CONFIG_IPQ_MAX_NAND_DEVICE + \
 					 CONFIG_IPQ_MAX_SPI_DEVICE)
 
-#if !defined(IPQ40XX_AP4220)
+#if !defined(IPQ40XX_AP4220) && \
+	!defined(IPQ40XX_FOGPOD502) && \
+	!defined(IPQ40XX_FOGPOD800) && \
+	!defined(IPQ40XX_AC58U) && \
+	!defined(IPQ40XX_DR40X9) && \
+	!defined(IPQ40XX_DAP2610) && \
+	!defined(IPQ40XX_E2600ACC2) && \
+	!defined(IPQ40XX_EMR3500) && \
+	!defined(IPQ40XX_ENS620EXT) && \
+	!defined(IPQ40XX_EX61X0V2) && \
+	!defined(IPQ40XX_LE1) && \
+	!defined(IPQ40XX_OAP100) && \
+	!defined(IPQ40XX_R619AC) && \
+	!defined(IPQ40XX_WD1200G) && \
+	!defined(IPQ40XX_WPJ428) && \
+	!defined(IPQ40XX_WRE6606) && \
+	!defined(IPQ40XX_X1PRO) && \
+	!defined(IPQ40XX_AP1300) && \
+	!defined(IPQ40XX_B1300) && \
+	!defined(IPQ40XX_S1300)
 #define CONFIG_QCA_MMC
 #endif
 
