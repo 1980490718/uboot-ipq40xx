@@ -17,7 +17,7 @@
 	"baudrate=115200\0" \
 	"boot1=echo Booting from: $partname\0" \
 	"boot2=nand device 1 && set mtdids nand1=nand1\0" \
-	"boot3=if test $single_part = 1; then run boot6; else run boot9; fi\0" \
+	"boot3=if test $single_part = 1; then run boot6; else run boot7; fi\0" \
 	"boot4=ubi part $partname && ubi read 84000000 kernel\0" \
 	"boot5=cfgsel 84000000 && run bootfdtcmd\0" \
 	"boot6=run boot2 boot9 rec3; echo MTD initialized\0" \
