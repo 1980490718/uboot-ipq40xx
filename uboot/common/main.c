@@ -498,6 +498,13 @@ void main_loop (void)
 #if defined(IPQ40XX_AC58U)
 			gpio_set_value(GPIO_AC58U_POWER_LED, 1);
 #endif
+#if defined(IPQ40XX_FOGPOD800)
+			gpio_set_value(GPIO_FOGPOD800_POWER_RED_LED, 1);
+			gpio_set_value(GPIO_FOGPOD800_2G_BLUE_LED, 1);
+			gpio_set_value(GPIO_FOGPOD800_5G_BLUE_LED, 1);
+			gpio_set_value(GPIO_FOGPOD800_USB_BLUE_LED, 1);
+			gpio_set_value(GPIO_FOGPOD800_WAN_GREEN_LED, 1);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 			gpio_set_value(GPIO_AP4220_POWER_LED, 1);
@@ -523,7 +530,7 @@ void main_loop (void)
 			break;
 		}
 		udelay( 500000 );
-	
+
 		switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 #if defined(IPQ40XX_S1300)
@@ -579,6 +586,13 @@ void main_loop (void)
 #if defined(IPQ40XX_AC58U)
 			gpio_set_value(GPIO_AC58U_POWER_LED, 0);
 #endif
+#if defined(IPQ40XX_FOGPOD800)
+			gpio_set_value(GPIO_FOGPOD800_POWER_RED_LED, 0);
+			gpio_set_value(GPIO_FOGPOD800_2G_BLUE_LED, 0);
+			gpio_set_value(GPIO_FOGPOD800_5G_BLUE_LED, 0);
+			gpio_set_value(GPIO_FOGPOD800_USB_BLUE_LED, 0);
+			gpio_set_value(GPIO_FOGPOD800_WAN_GREEN_LED, 0);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 #if defined(IPQ40XX_E2600ACC2)
@@ -618,7 +632,7 @@ void main_loop (void)
 			goto mainloop;
 		}
 	}
-	
+
 	if (counter > 2) {
 
 		//printf("\nReset button GPIO%d value: %d\n\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
@@ -677,6 +691,13 @@ void main_loop (void)
 #endif
 #if defined(IPQ40XX_AC58U)
 		gpio_set_value(GPIO_AC58U_POWER_LED, 1);
+#endif
+#if defined(IPQ40XX_FOGPOD800)
+		gpio_set_value(GPIO_FOGPOD800_POWER_RED_LED, 1);
+		gpio_set_value(GPIO_FOGPOD800_2G_BLUE_LED, 1);
+		gpio_set_value(GPIO_FOGPOD800_5G_BLUE_LED, 1);
+		gpio_set_value(GPIO_FOGPOD800_USB_BLUE_LED, 1);
+		gpio_set_value(GPIO_FOGPOD800_WAN_GREEN_LED, 1);
 #endif
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:

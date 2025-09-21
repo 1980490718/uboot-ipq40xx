@@ -219,6 +219,13 @@ void LED_INIT(void) {
 			gpio_set_value(GPIO_AC58U_USB_LED, 0);
 			gpio_set_value(GPIO_AC58U_LAN_LED, 0);
 #endif
+#if defined(IPQ40XX_FOGPOD800)
+			gpio_set_value(GPIO_FOGPOD800_POWER_RED_LED, 0);
+			gpio_set_value(GPIO_FOGPOD800_2G_BLUE_LED, 0);
+			gpio_set_value(GPIO_FOGPOD800_5G_BLUE_LED, 0);
+			gpio_set_value(GPIO_FOGPOD800_USB_BLUE_LED, 0);
+			gpio_set_value(GPIO_FOGPOD800_WAN_GREEN_LED, 0);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 			gpio_set_value(GPIO_AP4220_POWER_LED, 0);
@@ -345,6 +352,13 @@ void LED_BOOTING(void) {
 			gpio_set_value(GPIO_AC58U_USB_LED, 0);
 			gpio_set_value(GPIO_AC58U_LAN_LED, 0);
 #endif
+#if defined(IPQ40XX_FOGPOD800)
+			gpio_set_value(GPIO_FOGPOD800_POWER_RED_LED, 1);
+			gpio_set_value(GPIO_FOGPOD800_2G_BLUE_LED, 1);
+			gpio_set_value(GPIO_FOGPOD800_5G_BLUE_LED, 1);
+			gpio_set_value(GPIO_FOGPOD800_USB_BLUE_LED, 1);
+			gpio_set_value(GPIO_FOGPOD800_WAN_GREEN_LED, 1);
+#endif
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 			gpio_set_value(GPIO_AP4220_POWER_LED, 0);
@@ -468,6 +482,14 @@ void board_names_init()
 		led_upgrade_write_flashing_1=GPIO_AP1300_POWER_LED;
 		led_upgrade_write_flashing_2=GPIO_AP1300_POWER_LED;
 		led_upgrade_erase_flashing=GPIO_AP1300_POWER_LED;
+		flashing_power_led=1;
+#endif
+#if defined(IPQ40XX_FOGPOD800)
+		power_led=GPIO_FOGPOD800_POWER_RED_LED;
+		led_tftp_transfer_flashing=GPIO_FOGPOD800_POWER_RED_LED;
+		led_upgrade_write_flashing_1=GPIO_FOGPOD800_USB_BLUE_LED;
+		led_upgrade_write_flashing_2=GPIO_FOGPOD800_WAN_GREEN_LED;
+		led_upgrade_erase_flashing=GPIO_FOGPOD800_POWER_RED_LED;
 		flashing_power_led=1;
 #endif
 #if defined(IPQ40XX_AC58U)

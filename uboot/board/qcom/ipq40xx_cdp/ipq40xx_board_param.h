@@ -1688,6 +1688,58 @@ gpio_func_data_t ap_dk01_1_c2_sw_gpio_qfn[] = {
 		.gpio_od_en = GPIO_OD_DISABLE,
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
+#if defined(IPQ40XX_FOGPOD800)
+	{
+		.gpio = 2, /*FOGPOD800 power red led*/
+		.func = 0,
+		.pull = GPIO_NO_PULL,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_ENABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 3, /*FOGPOD800 wan green led*/
+		.func = 0,
+		.pull = GPIO_NO_PULL,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_ENABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 4, /*FOGPOD800 5g blue led*/
+		.func = 0,
+		.pull = GPIO_NO_PULL,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_ENABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 5, /*FOGPOD800 usb blue led*/
+		.func = 0,
+		.pull = GPIO_NO_PULL,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_ENABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+	{
+		.gpio = 58, /*FOGPOD800 2g blue led*/
+		.func = 0,
+		.pull = GPIO_NO_PULL,
+		.drvstr = GPIO_2MA,
+		.oe = GPIO_OE_ENABLE,
+		.gpio_vm = GPIO_VM_ENABLE,
+		.gpio_od_en = GPIO_OD_DISABLE,
+		.gpio_pu_res = GPIO_PULL_RES2
+	},
+#endif
 	/*ap1300 gpio led status, set by writel(GPIO_OUT, GPIO_IN_OUT_ADDR(2)); */
 #if defined(IPQ40XX_AP1300)
 	{
