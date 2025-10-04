@@ -52,6 +52,7 @@ int read_firmware(void) {
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C4:
 			if (fw_type == FW_TYPE_OPENWRT_EMMC) {
 				print_firmware_read_info("eMMC", openwrt_firmware_size, openwrt_firmware_start);
 				unsigned long blocks = (openwrt_firmware_size + 511) / 512;
@@ -63,15 +64,22 @@ int read_firmware(void) {
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+		case MACH_TYPE_IPQ40XX_DB_DK01_1_C1:
+		case MACH_TYPE_IPQ40XX_DB_DK02_1_C1:
+		case MACH_TYPE_IPQ40XX_TB832:
 			print_firmware_read_info("SPI", openwrt_firmware_size, openwrt_firmware_start);
 			snprintf(cmd, sizeof(cmd), "sf probe && sf read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C5:
+		case MACH_TYPE_IPQ40XX_AP_DK05_1_C1:
+		case MACH_TYPE_IPQ40XX_AP_DK06_1_C1:
 			print_firmware_read_info("NAND", openwrt_firmware_size, openwrt_firmware_start);
 			snprintf(cmd, sizeof(cmd), "nand device 1 && nand read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C2:
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 			print_firmware_read_info("NAND", openwrt_firmware_size, openwrt_firmware_start);
 			snprintf(cmd, sizeof(cmd), "nand device 0 && nand read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
