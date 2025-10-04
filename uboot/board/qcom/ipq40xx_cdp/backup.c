@@ -56,10 +56,10 @@ int read_firmware(void) {
 			if (fw_type == FW_TYPE_OPENWRT_EMMC) {
 				print_firmware_read_info("eMMC", openwrt_firmware_size, openwrt_firmware_start);
 				unsigned long blocks = (openwrt_firmware_size + 511) / 512;
-				snprintf(cmd, sizeof(cmd), "mmc read 0x88000000 0x%x 0x%lx", openwrt_firmware_start, blocks);
+				snprintf(cmd, sizeof(cmd), "mmc read 0x%x 0x%x 0x%lx", WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_start, blocks);
 			} else {
 				print_firmware_read_info("SPI", openwrt_firmware_size, openwrt_firmware_start);
-				snprintf(cmd, sizeof(cmd), "sf probe && sf read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
+				snprintf(cmd, sizeof(cmd), "sf probe && sf read 0x%x 0x%x 0x%x", WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_start, openwrt_firmware_size);
 			}
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
@@ -68,7 +68,7 @@ int read_firmware(void) {
 		case MACH_TYPE_IPQ40XX_DB_DK02_1_C1:
 		case MACH_TYPE_IPQ40XX_TB832:
 			print_firmware_read_info("SPI", openwrt_firmware_size, openwrt_firmware_start);
-			snprintf(cmd, sizeof(cmd), "sf probe && sf read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
+			snprintf(cmd, sizeof(cmd), "sf probe && sf read 0x%x 0x%x 0x%x", WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_start, openwrt_firmware_size);
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
@@ -76,13 +76,13 @@ int read_firmware(void) {
 		case MACH_TYPE_IPQ40XX_AP_DK05_1_C1:
 		case MACH_TYPE_IPQ40XX_AP_DK06_1_C1:
 			print_firmware_read_info("NAND", openwrt_firmware_size, openwrt_firmware_start);
-			snprintf(cmd, sizeof(cmd), "nand device 1 && nand read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
+			snprintf(cmd, sizeof(cmd), "nand device 1 && nand read 0x%x 0x%x 0x%x", WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_start, openwrt_firmware_size);
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C2:
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 			print_firmware_read_info("NAND", openwrt_firmware_size, openwrt_firmware_start);
-			snprintf(cmd, sizeof(cmd), "nand device 0 && nand read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
+			snprintf(cmd, sizeof(cmd), "nand device 0 && nand read 0x%x 0x%x 0x%x", WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_start, openwrt_firmware_size);
 			break;
 		default:
 			printf("Error: Unsupported board type!\n");
@@ -92,7 +92,7 @@ int read_firmware(void) {
 	int ret = run_command(cmd, 0);
 	if (ret == 0) {
 		printf("Board Type: %s\n", get_board_type_str_machid(gboard_param->machid));
-		printf("Success: Read 0x%x-0x%x to RAM at 0x88000000\n", openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1);
+		printf("Success: Read 0x%x-0x%x to RAM at 0x%x\n", openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1, WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
 		char size_str[64];
 		format_size_string(size_str, sizeof(size_str), openwrt_firmware_size);
 		printf("Size: %s\n", size_str);
@@ -116,7 +116,7 @@ U_BOOT_CMD(
 	readfw, 1, 0, do_readfw,
 	"Read firmware image into RAM",
 	"\nUsage: readfw\n"
-	"Read firmware from flash storage into RAM at 0x88000000\n"
+	"Read firmware from flash storage into RAM at 0x%x, WEBFAILSAFE_UPLOAD_RAM_ADDRESS\n"
 	"for recovery or upgrade purposes."
 );
 int do_backupfw(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]) {
@@ -136,7 +136,7 @@ int do_backupfw(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]) {
 	}
 	char cmd[128];
 	snprintf(cmd, sizeof(cmd),
-		"tftpput 0x88000000 0x%x firmware_backup.bin", openwrt_firmware_size);
+		"tftpput 0x%x 0x%x firmware_backup.bin", WEBFAILSAFE_UPLOAD_RAM_ADDRESS, openwrt_firmware_size);
 	if (run_command(cmd, 0) == 0) {
 		printf("Success: Firmware backup completed\n");
 		printf("Backup filename: firmware_backup.bin\n\n");
@@ -167,10 +167,11 @@ int web_handle_read(char *response_buffer, size_t buffer_size) {
 	if (result == 0) {
 		format_size_string(size_str, sizeof(size_str), firmware_loaded_to_ram ? last_firmware_size : openwrt_firmware_size);
 		snprintf(response_buffer, buffer_size,
-			"Success: Firmware read completed\n Size: %s\n Address: 0x%x-0x%x\n RAM: 0x88000000\n Board: %s\n Firmware Type: %s\n\n",
+			"Success: Firmware read completed\n Size: %s\n Address: 0x%x-0x%x\n RAM: 0x%x\n Board: %s\n Firmware Type: %s\n\n",
 			size_str, firmware_loaded_to_ram ? last_firmware_start : openwrt_firmware_start,
 			(firmware_loaded_to_ram ? last_firmware_start : openwrt_firmware_start) +
 			(firmware_loaded_to_ram ? last_firmware_size : openwrt_firmware_size) - 1,
+			WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
 			get_board_type_str_machid(gboard_param->machid), fw_type_str
 		);
 	} else {
@@ -195,7 +196,7 @@ int web_handle_download(unsigned char **firmware_data, unsigned int *firmware_si
 			return -1;
 		}
 	}
-	*firmware_data = (unsigned char *)0x88000000;
+	*firmware_data = (unsigned char *)WEBFAILSAFE_UPLOAD_RAM_ADDRESS;
 	*firmware_size = last_firmware_size;
 	if (*firmware_data == NULL || *firmware_size == 0) {
 		printf("Error: Invalid firmware data (address: 0x%p, size: %u)\n", *firmware_data, *firmware_size);
