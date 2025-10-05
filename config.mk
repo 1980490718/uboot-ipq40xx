@@ -234,6 +234,39 @@ else
 CFLAGS := $(CPPFLAGS) -Wall -Wstrict-prototypes
 endif
 
+C_STD_OPTIONS := gnu89 c89 gnu99 c99
+C_STD_SUPPORTED := $(strip $(foreach std,$(C_STD_OPTIONS),\
+	$(if $(call cc-option,-std=$(std)),$(std))))
+
+ifneq (,$(findstring gnu89,$(C_STD_SUPPORTED)))
+C_STANDARD := gnu89
+else ifneq (,$(findstring c89,$(C_STD_SUPPORTED)))
+C_STANDARD := c89
+else ifneq (,$(findstring gnu99,$(C_STD_SUPPORTED)))
+C_STANDARD := gnu99
+else ifneq (,$(findstring c99,$(C_STD_SUPPORTED)))
+C_STANDARD := c99
+else
+C_STANDARD :=
+endif
+
+ifneq ($(C_STANDARD),)
+CFLAGS += -std=$(C_STANDARD)
+# $(info Using C standard: $(C_STANDARD))
+endif
+
+CFLAGS += $(call cc-option,-Wno-long-long) \
+          $(call cc-option,-Wno-variadic-macros) \
+          $(call cc-option,-Wno-declaration-after-statement) \
+          $(call cc-option,-Wno-missing-braces) \
+          $(call cc-option,-Wno-unused-parameter) \
+          $(call cc-option,-Wno-sign-compare)
+
+CFLAGS += $(call cc-option,-Wimplicit-function-declaration)
+
+CFLAGS += $(call cc-option,-fno-strict-aliasing) \
+          $(call cc-option,-fno-common)
+
 CFLAGS += $(QSDK_CFLAGS)
 
 CFLAGS_SSP := $(call cc-option,-fno-stack-protector)
