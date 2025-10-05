@@ -171,6 +171,6 @@ typedef void (*set_dcd_rst_t)(struct imx_header *imxhdr,
 typedef void (*set_imx_hdr_t)(struct imx_header *imxhdr,
 					uint32_t dcd_len,
 					struct stat *sbuf,
-					struct mkimage_params *params);
+					struct image_tool_params *params);
 
 #endif /* _IMXIMAGE_H_ */
