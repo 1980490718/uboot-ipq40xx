@@ -1,177 +1,220 @@
+# Copyright (C) 2025 1980490718@qq.com
+# Author: Willem Lee <1980490718@qq.com>
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# This is free software, licensed under the GNU General Public License v2.
+# See /LICENSE for more information.
+
+# U-Boot Build Automation Script
+# Features:
+# - Auto-detects supported board configurations
+# - Supports individual or batch board compilation
+# - Generates verified firmware packages (ELF/BIN + MD5)
+# - Provides comprehensive cleanup options
+# - Detailed build logging and artifact reporting
+#
+# Usage Examples:
+# ./build.sh [board1] [board2]  # Build specific boards
+# ./build.sh all                # Build all detected boards
+# ./build.sh clean              # Clean build artifacts
+# ./build.sh clean_all          # Remove all generated files
+# ./build.sh help               # Show usage information
+
+#!/bin/bash
+
 #!/bin/bash
 
 set -e
 set -o pipefail
 
+# This script builds U-Boot for various boards based on the provided configuration files.
+# It supports building all boards, cleaning build files, and displaying help information.
+export STAGING_DIR=/home/a/1980490718/openwrt-sdk-ipq806x-qsdk53/staging_dir
+export TOOLPATH=${STAGING_DIR}/toolchain-arm_cortex-a7_gcc-4.8-linaro_uClibc-1.0.14_eabi/
+export PATH=${TOOLPATH}/bin:${PATH}
+export MAKECMD="make --silent ARCH=arm CROSS_COMPILE=arm-openwrt-linux-"
+export CONFIG_BOOTDELAY=1
+export MAX_UBOOT_SIZE=524288
+
+# Define colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 RESET='\033[0m'
 
+# Directory containing U-Boot source code (current directory)
+UBOOT_DIR="."
+
+# Function to show help information
 show_help() {
-    echo -e "${CYAN}用法:${RESET} $0 <board-name1> [board-name2 ...]"
-    echo ""
-    echo "命令列表:"
-    echo -e "  ${YELLOW}all${RESET}           编译 include/configs/ 下所有板子"
-    echo -e "  ${YELLOW}clean${RESET}         清理构建输出（删除 bin/ 和日志）"
-    echo -e "  ${YELLOW}help${RESET}          显示此帮助信息"
-    echo ""
-    echo "支持的 board 名称:"
-    if [ -d include/configs ]; then
-        find include/configs -maxdepth 1 -type f -name "ipq40xx_*.h" \
-            | sed 's|.*/ipq40xx_||; s|\.h$||' | sort | sed 's/^/  - /'
-    else
-        echo "  (未找到 include/configs 目录)"
-    fi
+	echo -e "${CYAN}📝Usage:${RESET} $0 <board-name1> [board-name2 ...]"
+	echo ""
+	echo "Command list:"
+	echo -e "  ${YELLOW}🔄all${RESET}           Build all boards in ${UBOOT_DIR}/include/configs/"
+	echo -e "  ${YELLOW}🧹clean${RESET}         Clean build files/logs"
+	echo -e "  ${YELLOW}🧹clean_all${RESET}     Clean build files and remove bin/ products/logs"
+	echo -e "  ${YELLOW}❓help${RESET}          Show this help message"
+	echo ""
+	echo "📄Supported board names:"
+	if [ -d "${UBOOT_DIR}/include/configs" ]; then
+		find "${UBOOT_DIR}/include/configs" -maxdepth 1 -type f -name "ipq40xx_*.h" \
+			| sed 's|.*/ipq40xx_||; s|\.h$||' | sort | sed 's/^/  - /'
+	else
+		echo "  ❌(Directory ${UBOOT_DIR}/include/configs not found)"
+	fi
 }
 
+# Function to build U-Boot for a specific board
 build_board() {
-    local board=$1
-    local config_file="include/configs/ipq40xx_${board}.h"
+	# Initialize build environment
+	local board=$1
+	local config_file="${UBOOT_DIR}/include/configs/ipq40xx_${board}.h"
 
-    export BUILD_TOPDIR=$(pwd)
-    local LOGFILE="${BUILD_TOPDIR}/build.log"
-    echo -e "\n==== 构建 $board ====\n" >> "$LOGFILE"
+	# Setup build directory and log file
+	export BUILD_TOPDIR=$(pwd)
+	local LOGFILE="${BUILD_TOPDIR}/build.log"
+	echo -e "\n==== ⏳Building $board ====\n" >> "$LOGFILE"
 
-    if [[ ! -f "$config_file" ]]; then
-        echo -e "${RED}❌ 错误: 未找到配置文件: ${config_file}${RESET}" | tee -a "$LOGFILE"
-        return 1
-    fi
+	# Verify config file exists
+	if [[ ! -f "$config_file" ]]; then
+		echo -e "${RED}❌ Error: Config file not found: ${config_file}${RESET}" | tee -a "$LOGFILE"
+		return 1
+	fi
 
-    echo -e "${CYAN}===> 编译板子: ${board}${RESET}" | tee -a "$LOGFILE"
+	echo -e "${CYAN}===> ⌛Building board: ${board}${RESET}" | tee -a "$LOGFILE"
 
-    export STAGING_DIR=/home/a/uboot-ipq40xx1/openwrt-sdk-ipq806x-qsdk53/staging_dir
-    export TOOLPATH=${STAGING_DIR}/toolchain-arm_cortex-a7_gcc-4.8-linaro_uClibc-1.0.14_eabi/
-    export PATH=${TOOLPATH}/bin:${PATH}
-    export MAKECMD="make --silent ARCH=arm CROSS_COMPILE=arm-openwrt-linux-"
-    export CONFIG_BOOTDELAY=1
-    export MAX_UBOOT_SIZE=524288
+	# Create build directory if it doesn't exist
+	mkdir -p "${BUILD_TOPDIR}/bin"
 
-    mkdir -p "${BUILD_TOPDIR}/bin"
+	# Configure U-Boot for the target board
+	echo "===> 🔧Configuring: ipq40xx_${board}_config" | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD} ipq40xx_${board}_config 2>&1) | tee -a "$LOGFILE"
 
-    echo "===> 配置: ipq40xx_${board}_config" | tee -a "$LOGFILE"
-    ${MAKECMD} ipq40xx_${board}_config 2>&1 | tee -a "$LOGFILE"
+	# Compile U-Boot
+	echo "===> 🔄Compiling..." | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD} ENDIANNESS=-EB V=1 all 2>&1) | tee -a "$LOGFILE"
 
-    echo "===> 编译中..." | tee -a "$LOGFILE"
-    ${MAKECMD} ENDIANNESS=-EB V=1 all 2>&1 | tee -a "$LOGFILE"
+	# Check if the compilation was successful
+	local uboot_out="${UBOOT_DIR}/u-boot"
+	if [[ ! -f "$uboot_out" ]]; then
+		echo -e "${RED}❌ Error: u-boot file not generated${RESET}" | tee -a "$LOGFILE"
+		return 1
+	fi
 
-    if [[ ! -f "u-boot" ]]; then
-        echo -e "${RED}❌ 错误: 未生成 u-boot 文件${RESET}" | tee -a "$LOGFILE"
-        return 1
-    fi
+	# Generate stripped ELF file
+	# Copy u-boot to a temporary location
+	local out_elf="${BUILD_TOPDIR}/bin/openwrt-${board}-u-boot-stripped.elf"
+	cp "$uboot_out" "$out_elf"
 
-    local out_elf="${BUILD_TOPDIR}/bin/openwrt-${board}-u-boot-stripped.elf"
-    cp u-boot "$out_elf"
-    arm-openwrt-linux-objcopy --strip-all "$out_elf"
+	# Strip ELF using sstrip
+	${STAGING_DIR}/host/bin/sstrip "$out_elf"
 
-    local size
-    size=$(stat -c%s "$out_elf")
-    if [[ $size -gt $MAX_UBOOT_SIZE ]]; then
-        echo -e "${RED}⚠️ 警告: u-boot 文件大小超出限制 (${size} bytes)${RESET}" | tee -a "$LOGFILE"
-    fi
+	# Generate fixed-size .bin image (512 KiB, padded with 0xFF)
+	local out_bin="${BUILD_TOPDIR}/bin/${board}-u-boot.bin"
+	dd if=/dev/zero bs=1k count=512 | tr '\000' '\377' > "$out_bin"
+	dd if="$out_elf" of="$out_bin" conv=notrunc
+	md5sum "$out_bin" > "${out_bin}.md5"
 
-    (
-        cd "$(dirname "$out_elf")"
-        md5sum "$(basename "$out_elf")" > "$(basename "$out_elf").md5"
-    )
+	# Check if the bin file size exceeds the limit
+	local size
+	size=$(stat -c%s "$out_bin")
+	if [[ $size -gt $MAX_UBOOT_SIZE ]]; then
+		echo -e "${RED}⚠️ Warning: bin file size exceeds limit (${size} bytes)${RESET}" | tee -a "$LOGFILE"
+	fi
 
-    echo -e "${GREEN}✅ 编译完成: $(basename "$out_elf")${RESET}" | tee -a "$LOGFILE"
-    echo -e "${GREEN}✅ 生成校验: $(basename "$out_elf").md5${RESET}" | tee -a "$LOGFILE"
+	# Generate MD5 checksum for the ELF file
+	(
+		cd "$(dirname "$out_elf")"
+		md5sum "$(basename "$out_elf")" > "$(basename "$out_elf").md5"
+	)
 
-    # 清理 build.log 中颜色和 emoji，生成 clean 日志
-    sed -r 's/\x1B\[[0-9;]*[a-zA-Z]//g; s/[[:cntrl:]]//g; s/[^[:print:]\t]//g' build.log > build.clean.log
+	echo -e "${GREEN}✅ Build completed: $(basename "$out_elf")${RESET}" | tee -a "$LOGFILE"
+	echo -e "${GREEN}✅ Checksum generated: $(basename "$out_elf").md5${RESET}" | tee -a "$LOGFILE"
+	echo -e "${GREEN}✅ Image generated: $(basename "$out_bin")${RESET}" | tee -a "$LOGFILE"
+	echo -e "${GREEN}✅ Checksum generated: $(basename "$out_bin").md5${RESET}" | tee -a "$LOGFILE"
 
-    # 打包当前板子产物 + 干净日志
-    local timestamp=$(date +%Y%m%d_%H%M%S)
-    local zipfile="bin/output-${board}-${timestamp}.zip"
-    zip -9j "$zipfile" "$out_elf" "$out_elf.md5" build.clean.log > /dev/null
-    echo -e "${GREEN}📦 打包成功: $(basename "$zipfile")${RESET}" | tee -a "$LOGFILE"
+	# Clean up logs
+	sed -r 's/\x1B\[[0-9;]*[a-zA-Z]//g; s/[[:cntrl:]]//g; s/[^[:print:]\t]//g' build.log > build.clean.log
 
-    # 显示构建产物信息（KiB 单位）
-    local elfsize=$(stat -c%s "$out_elf" | awk '{printf "%.1f KiB", $1/1024}')
-    local elfmd5=$(md5sum "$out_elf" | awk '{print $1}')
-    local zipsize=$(stat -c%s "$zipfile" | awk '{printf "%.1f KiB", $1/1024}')
-    local zipmd5=$(md5sum "$zipfile" | awk '{print $1}')
+	# Package the ELF and BIN files with MD5 checksums in a ZIP file
+	# Add a timestamp to the ZIP
+	local timestamp=$(date +%Y%m%d_%H%M%S)
+	local zipfile="bin/u-boot-${board}-${timestamp}.zip"
+	zip -9j "$zipfile" "$out_elf" "$out_elf.md5" "$out_bin" "$out_bin.md5" build.clean.log > /dev/null
+	echo -e "${GREEN}📦 Package created: $(basename "$zipfile")${RESET}" | tee -a "$LOGFILE"
+	# Clean up logs in parent directory after packaging
+	rm -f "${BUILD_TOPDIR}/build.log" "${BUILD_TOPDIR}/build.clean.log"
 
-    echo -e "${CYAN}📄 构建产物详情：${RESET}"
-    echo -e "  ➤ ELF 文件:       $(basename "$out_elf")"
-    echo -e "      大小:         ${elfsize}"
-    echo -e "      MD5:          ${elfmd5}"
-    echo -e "  ➤ 打包文件:      $(basename "$zipfile")"
-    echo -e "      大小:         ${zipsize}"
-    echo -e "      路径:         ${zipfile}"
-    echo -e "      MD5:          ${zipmd5}"
+	# Display build artifacts details
+	local elfsize=$(stat -c%s "$out_elf" | awk '{printf "%.1f KiB", $1/1024}')
+	local elfmd5=$(md5sum "$out_elf" | awk '{print $1}')
+	local binsize=$(stat -c%s "$out_bin" | awk '{printf "%.1f KiB", $1/1024}')
+	local binmd5=$(md5sum "$out_bin" | awk '{print $1}')
+	local zipsize=$(stat -c%s "$zipfile" | awk '{printf "%.1f KiB", $1/1024}')
+	local zipmd5=$(md5sum "$zipfile" | awk '{print $1}')
+
+	# Display build artifacts details
+	echo -e "${GREEN}===> 📦 Build artifacts for ${board} completed${RESET}"
+	echo -e "${CYAN}📄 Build artifacts details:${RESET}"
+	echo -e "  ➤ ELF file:       $(basename "$out_elf")"
+	echo -e "      Size:         ${elfsize}"
+	echo -e "      MD5:          ${elfmd5}"
+	echo -e "  ➤ BIN image:      $(basename "$out_bin")"
+	echo -e "      Size:         ${binsize}"
+	echo -e "      MD5:          ${binmd5}"
+	echo -e "  ➤ Package file:   $(basename "$zipfile")"
+	echo -e "      Size:         ${zipsize}"
+	echo -e "      Path:         ${zipfile}"
+	echo -e "      MD5:          ${zipmd5}"
 }
 
-clean_build() {
-    echo -e "${YELLOW}===> 清理构建文件...${RESET}"
-    rm -rf ./bin
-    find . -maxdepth 1 -type f -name "build*.log" -exec rm -f {} \;
-
-    rm -f .depend
-    find . -type f \( \
-        -name "*.o" -or -name "*.su" -or -name "*.a" -or \
-        -name "*.map" -or -name "*.bin" -or -name "*.s" -or \
-        -name "*.srec" -or -name "*.depend*" -or \
-        -name "u-boot" -or -name "envcrc" \
-    \) -exec rm -f {} \;
-
-    rm -rf \
-        arch/arm/include/asm/arch \
-        arch/arm/include/asm/proc \
-        examples/standalone/hello_world \
-        include/asm \
-        include/autoconf.mk \
-        include/autoconf.mk.dep \
-        include/config.h \
-        include/config.mk \
-        include/generated \
-        tools/dumpimage \
-        tools/gen_eth_addr \
-        tools/mkenvimage \
-        tools/mkimage \
-        u-boot.lds
-
-    if git rev-parse --is-inside-work-tree &>/dev/null; then
-        echo -e "${YELLOW}===> 删除 git 未跟踪文件和目录...${RESET}"
-        git clean -fd
-    fi
-
-    if [[ -d ./uboot ]]; then
-        cd ./uboot
-        make --silent clean || echo "提示: uboot 目录下无 clean 目标"
-        cd ..
-    fi
-
-    echo -e "${GREEN}===> 清理完成${RESET}"
-}
-
-# 主入口
+# Main script logic
 case "$1" in
-    clean)
-        clean_build
-        ;;
-    help|-h|--help)
-        show_help
-        ;;
-    all)
-        echo -e "${CYAN}===> 编译 include/configs 中所有 board...${RESET}"
-        boards=$(find include/configs -maxdepth 1 -name 'ipq40xx_*.h' | sed 's|.*/ipq40xx_||; s|\.h$||' | sort)
-        for board in $boards; do
-            build_board "$board"
-        done
-        ;;
-    "")
-        echo -e "${RED}❌ 错误: 未指定命令或板子名称${RESET}"
-        show_help
-        exit 1
-        ;;
-    *)
-        shift 0
-        for board in "$@"; do
-            build_board "$board"
-        done
-        ;;
+	clean)
+		# Clean build files/logs
+		export BUILD_TOPDIR=$(pwd)
+		echo -e "${YELLOW}===> 🧹Performing distclean...${RESET}"
+		(cd ${UBOOT_DIR} && ARCH=arm CROSS_COMPILE=arm-openwrt-linux- make --silent distclean) 2>/dev/null
+		rm -f ${UBOOT_DIR}/httpd/fsdata.c
+		rm -f ${BUILD_TOPDIR}/*.log
+		echo -e "${GREEN}===> 🧹Performing distclean completed${RESET}"
+		;;
+	clean_all)
+		# Clean build files and remove products/logs
+		# Clean build files/logs
+		export BUILD_TOPDIR=$(pwd)
+		echo -e "${YELLOW}===> 🧹Performing distclean and removing products...${RESET}"
+		$0 clean
+		rm -f ${BUILD_TOPDIR}/bin/*.bin
+		rm -f ${BUILD_TOPDIR}/bin/*.elf
+		rm -f ${BUILD_TOPDIR}/bin/*.md5
+		rm -f ${BUILD_TOPDIR}/bin/*.zip
+		rm -f ${BUILD_TOPDIR}/*.log
+		echo -e "${GREEN}===> 🧹Performing distclean and removing products completed${RESET}"
+		;;
+	help|-h|--help)
+		show_help
+		;;
+	all)
+		# Build all boards in include/configs/
+		echo -e "${CYAN}===> 🔄Building all boards in ${UBOOT_DIR}/include/configs...${RESET}"
+		boards=$(find "${UBOOT_DIR}/include/configs" -maxdepth 1 -name 'ipq40xx_*.h' | sed 's|.*/ipq40xx_||; s|\.h$||' | sort)
+		for board in $boards; do
+			build_board "$board"
+		done
+		;;
+	"")
+		# No command or board name specified
+		echo -e "${RED}❌ Error: No command or board name specified${RESET}"
+		show_help
+		exit 1
+		;;
+	*)
+		# Build specified boards
+		shift 0
+		for board in "$@"; do
+			build_board "$board"
+		done
+		;;
 esac
-

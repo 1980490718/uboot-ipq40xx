@@ -1,4 +1,68 @@
-1、克隆本项目的源码：git clone https://github.com/1980490718/uboot-ipq.git
-2、克隆项目所需的工具链：git clone https://github.com/1980490718/glsdk53.git
-3、修改build.sh的第44、45行配置好工具链,可选注释掉或者删掉第136-139行
-4、输入./build.sh board来编译uboot,编译出的boot文件位置位在bin文件夹
+# U-Boot for IPQ40xx 构建说明
+
+## 项目简介
+本项目提供适用于IPQ40xx系列芯片的U-Boot固件构建脚本和源码。
+
+## 快速开始
+
+### 1. 克隆项目源码
+```bash
+git clone https://github.com/1980490718/uboot-ipq.git
+cd uboot-ipq
+```
+
+### 2. 获取工具链
+```bash
+git clone https://github.com/1980490718/glsdk53.git
+```
+
+### 3. 配置工具链路径
+编辑 `build.sh` 文件，修改第32-33行的工具链配置：
+
+```bash
+export STAGING_DIR=/path/to/your/glsdk53/staging_dir
+export TOOLPATH=${STAGING_DIR}/toolchain-arm_cortex-a7_gcc-4.8-linaro_uClibc-1.0.14_eabi/
+```
+
+### 4. 编译U-Boot
+```bash
+# 查看支持的开发板列表
+./build.sh help
+
+# 编译特定开发板（例如：cdp）
+./build.sh cdp
+
+# 编译所有支持的开发板
+./build.sh all
+
+# 清理构建文件
+./build.sh clean
+
+# 完全清理（包括构建产物）
+./build.sh clean_all
+```
+
+## 构建产物
+编译完成后，构建产物位于 `bin/` 目录下：
+- `openwrt-{board}-u-boot-stripped.elf` - 精简版ELF文件
+- `{board}-u-boot.bin` - 二进制镜像经过FF填充补足到512KB文件
+- 对应的MD5校验文件
+- 打包的ZIP文件（包含所有文件）
+
+## 支持的开发板
+当前支持的IPQ40xx开发板配置：
+- cdp (Customer Development Platform)
+
+## 注意事项
+- 确保工具链路径配置正确
+- 构建脚本会自动检测可用的开发板配置
+- 构建过程中会生成详细的日志文件
+
+## 故障排除
+如果遇到构建问题：
+1. 检查工具链路径是否正确
+2. 确保有足够的磁盘空间
+3. 查看 `build.log` 文件获取详细错误信息
+
+## 许可证
+本项目基于GPL-2.0-or-later许可证发布。
