@@ -104,7 +104,7 @@ build_board() {
 
 	# Generate stripped ELF file
 	# Copy u-boot to a temporary location
-	local out_elf="${BUILD_TOPDIR}/bin/openwrt-${board}-u-boot-stripped.elf"
+	local out_elf="${BUILD_TOPDIR}/bin/openwrt-ipq40xx-${board}-u-boot-stripped.elf"
 	cp "$uboot_out" "$out_elf"
 
 	# Strip ELF using sstrip
