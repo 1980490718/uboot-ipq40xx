@@ -479,7 +479,6 @@ int do_nand(cmd_tbl_t * cmdtp, int flag, int argc, char * const argv[])
 		else {
 			dev = (int)simple_strtoul(argv[2], NULL, 10);
 		}
-
 		ret = set_dev(dev);
 
 		return ret;

@@ -38,7 +38,6 @@
 #define CMD_S25FSXX_BE		0x60	/* Bulk Erase */
 
 int spi_flash_cmd_berase(struct spi_flash *flash, u8 cmd);
-
 struct spansion_spi_flash_params {
 	u16 idcode1;
 	u16 idcode2;

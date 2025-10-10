@@ -970,6 +970,21 @@ gpio_func_data_t ap_dk01_1_c2_sw_gpio_qfn[] = {
 	},
 };
 
+gpio_func_data_t uart1_gpio_dk01[] = {
+	{
+		.gpio = 60,
+		.func = 2,
+		.pull = GPIO_PULL_DOWN,
+		.oe = GPIO_OE_ENABLE
+	},
+	{
+		.gpio = 61,
+		.func = 2,
+		.pull = GPIO_NO_PULL,
+		.oe = GPIO_OE_ENABLE
+	},
+};
+
 gpio_func_data_t aliyun_ap4220_sw_gpio_qfn[] = {
 	{
 		.gpio = 52,
@@ -1002,7 +1017,7 @@ gpio_func_data_t aliyun_ap4220_sw_gpio_qfn[] = {
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 	{
-		.gpio = 5, //power led
+		.gpio = 5, // power led
 		.func = 0,
 		.pull = GPIO_NO_PULL,
 		.drvstr = GPIO_2MA,
@@ -1012,7 +1027,7 @@ gpio_func_data_t aliyun_ap4220_sw_gpio_qfn[] = {
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 	{
-		.gpio = 3, //2gwifi led
+		.gpio = 3, // 2gwifi led
 		.func = 0,
 		.pull = GPIO_NO_PULL,
 		.drvstr = GPIO_2MA,
@@ -1022,7 +1037,7 @@ gpio_func_data_t aliyun_ap4220_sw_gpio_qfn[] = {
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 	{
-		.gpio = 2, //5gwifi led
+		.gpio = 2, // 5gwifi led
 		.func = 0,
 		.pull = GPIO_NO_PULL,
 		.drvstr = GPIO_2MA,
@@ -1032,7 +1047,7 @@ gpio_func_data_t aliyun_ap4220_sw_gpio_qfn[] = {
 		.gpio_pu_res = GPIO_PULL_RES2
 	},
 	{
-		.gpio = 1, //usb power
+		.gpio = 1, // usb power
 		.func = 0,
 		.pull = GPIO_NO_PULL,
 		.drvstr = GPIO_2MA,
@@ -1040,21 +1055,6 @@ gpio_func_data_t aliyun_ap4220_sw_gpio_qfn[] = {
 		.gpio_vm = GPIO_VM_ENABLE,
 		.gpio_od_en = GPIO_OD_DISABLE,
 		.gpio_pu_res = GPIO_PULL_RES2
-	},
-};
-
-gpio_func_data_t uart1_gpio_dk01[] = {
-	{
-		.gpio = 60,
-		.func = 2,
-		.pull = GPIO_PULL_DOWN,
-		.oe = GPIO_OE_ENABLE
-	},
-	{
-		.gpio = 61,
-		.func = 2,
-		.pull = GPIO_NO_PULL,
-		.oe = GPIO_OE_ENABLE
 	},
 };
 
@@ -1368,7 +1368,7 @@ board_ipq40xx_params_t board_params[] = {
 		.nor_emmc_available = 0,
 		.dtb_config_name = { "config@5", "config@ap.dk01.1-c2" },
 	},
-	{
+		{
 		.machid = MACH_TYPE_IPQ40XX_ALIYUN_AP4220,
 		.ddr_size = (256 << 20),
 		.mtdids = "nand1=nand1,nand2=spi0.0",

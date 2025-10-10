@@ -594,7 +594,6 @@ int do_bootm(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		relocated = 1;
 	}
 #endif
-	dcache_enable();
 
 	/* determine if we have a sub command */
 	if (argc > 1) {
@@ -609,19 +608,12 @@ int do_bootm(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		 *
 		 * Right now we assume the first arg should never be '-'
 		 */
-		if ((*endp != 0) && (*endp != ':') && (*endp != '#')) {
-			ret = do_bootm_subcommand(cmdtp, flag, argc, argv);
-			dcache_disable();
-			return ret;
-		}
-
-
+		if ((*endp != 0) && (*endp != ':') && (*endp != '#'))
+			return do_bootm_subcommand(cmdtp, flag, argc, argv);
 	}
 
-	if (bootm_start(cmdtp, flag, argc, argv)) {
-		dcache_disable();
+	if (bootm_start(cmdtp, flag, argc, argv))
 		return 1;
-	}
 
 	/*
 	 * We have reached the point of no return: we are going to
@@ -667,7 +659,6 @@ int do_bootm(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			if (iflag)
 				enable_interrupts();
 			bootstage_error(BOOTSTAGE_ID_DECOMP_UNIMPL);
-			dcache_disable();
 			return 1;
 		}
 	}
@@ -679,7 +670,6 @@ int do_bootm(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 			enable_interrupts();
 		/* This may return when 'autostart' is 'no' */
 		bootm_start_standalone(iflag, argc, argv);
-		dcache_disable();
 		return 0;
 	}
 
@@ -698,7 +688,6 @@ int do_bootm(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		printf("ERROR: booting os '%s' (%d) is not supported\n",
 			genimg_get_os_name(images.os.os), images.os.os);
 		bootstage_error(BOOTSTAGE_ID_CHECK_BOOT_OS);
-		dcache_disable();
 		return 1;
 	}
 
@@ -712,7 +701,6 @@ int do_bootm(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 #endif
 	do_reset(cmdtp, flag, argc, argv);
 
-	dcache_disable();
 	return 1;
 }
 

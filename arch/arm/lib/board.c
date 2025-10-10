@@ -637,8 +637,10 @@ void board_init_r(gd_t *id, ulong dest_addr)
 	bb_miiphy_init();
 #endif
 #if defined(CONFIG_CMD_NET)
+#if !defined(CONFIG_IPQ_ETH_INIT_DEFER)
 	puts("Net:   ");
 	eth_initialize(gd->bd);
+#endif
 #if defined(CONFIG_RESET_PHY_R)
 	debug("Reset Ethernet PHY\n");
 	reset_phy();

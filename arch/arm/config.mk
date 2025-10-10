@@ -85,5 +85,5 @@ endif
 
 # needed for relocation
 ifndef CONFIG_NAND_SPL
-LDFLAGS_u-boot += -pie -z max-page-size=0x400
+LDFLAGS_u-boot += -pie -z max-page-size=0x400 --gc-sections -s -x
 endif

@@ -521,7 +521,7 @@ void psgmii_self_test(void)
 	u32 tx_ok, rx_ok;
 	u16 chip_config;
 
-	//Save original chip config
+	/* Save original chip config */
 	chip_config = qca8075_phy_reg_read(0, 4, QCA8075_PHY_CHIP_CONFIG);
 
 	/*
@@ -689,8 +689,7 @@ void psgmii_self_test(void)
 	 * Disable traffic
 	 */
 	qca8075_phy_mmd_write(0, 0x1f, 7, 0x8020, 0x0);
-
-	// Restore chip config
+	/* Restore chip config */
 	qca8075_phy_reg_write(0, 4, QCA8075_PHY_CHIP_CONFIG, chip_config);
 }
 

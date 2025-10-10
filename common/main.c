@@ -256,6 +256,13 @@ int abortboot(int bootdelay)
 		printf("\b\b\b%2d ", bootdelay);
 	}
 
+#ifdef CONFIG_IPQ_ETH_INIT_DEFER
+	if (abort) {
+		puts("\nNet:   ");
+		eth_initialize(gd->bd);
+	}
+#endif
+
 	putc('\n');
 
 #ifdef CONFIG_SILENT_CONSOLE

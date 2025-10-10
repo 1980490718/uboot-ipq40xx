@@ -53,6 +53,7 @@
 #define CONFIG_SKIP_LOWLEVEL_INIT
 #define CONFIG_SYS_HZ			1000
 #define CONFIG_SYS_VSNPRINTF
+#define CONFIG_SYS_LONGHELP
 
 #define CONFIG_IPQ40XX_USB
 #ifdef CONFIG_IPQ40XX_USB
@@ -107,20 +108,20 @@
  */
 #define CONFIG_TZ_END_ADDR		0x88000000
 #define CONFIG_SYS_SDRAM_END		(CONFIG_SYS_SDRAM_BASE + gd->ram_size)
-#define CONFIG_IPQ40XX_I2C
+/* #define CONFIG_IPQ40XX_I2C */ /* Disabled by default */
 #ifdef CONFIG_IPQ40XX_I2C
 #define CONFIG_CMD_I2C
 #define CONFIG_SYS_I2C_SPEED	0
 #endif
 
-#define CONFIG_IPQ40XX_PCI
+/* #define CONFIG_IPQ40XX_PCI */ /* Disabled by default */
 #ifdef CONFIG_IPQ40XX_PCI
 #define CONFIG_PCI
 #define CONFIG_CMD_PCI
 #define CONFIG_PCI_SCAN_SHOW
 #endif
 
-#define CONFIG_CMD_CACHE
+/* #define CONFIG_CMD_CACHE */
 
 #ifndef __ASSEMBLY__
 #include <compiler.h>
@@ -176,6 +177,9 @@ typedef struct {
 #define QCA_ROOT_FS_PART_NAME           "rootfs"
 #define QCA_ROOT_FS_ALT_PART_NAME       QCA_ROOT_FS_PART_NAME "_1"
 
+/*Security Authentication*/
+/* #define CONFIG_SEC_AUTH */ /* Disabled by default */
+
 /* Environment */
 #define CONFIG_IPQ40XX_ENV
 #define CONFIG_ARCH_CPU_INIT
@@ -198,6 +202,7 @@ typedef struct {
 #define CONFIG_SYS_NULLDEV
 #define CONFIG_CMD_XIMG
 #define CONFIG_CMD_NET
+/* #define CONFIG_IPQ_ETH_INIT_DEFER */
 
 /* L1 cache line size is 64 bytes, L2 cache line size is 128 bytes
  * Cache flush and invalidation based on L1 cache, so the cache line
@@ -283,17 +288,15 @@ typedef struct {
 #define CONFIG_IPADDR	192.168.1.1
 #define CONFIG_SERVERIP	192.168.1.2
 #define CONFIG_IPQ_NO_MACS	2
-#define CONFIG_CMD_TFTPPUT
 /*
  * CRASH DUMP ENABLE
  */
 
-/* Disabled crashdump saves 11Mb of RAM.
-#define CONFIG_QCA_APPSBL_DLOAD	1
-*/
+#define CONFIG_CMD_TFTPPUT
+/* #define CONFIG_QCA_APPSBL_DLOAD	1 */ /* Disabled by default */
 
 #ifdef CONFIG_QCA_APPSBL_DLOAD
-
+#define CONFIG_CMD_TFTPPUT
 /* We will be uploading very big files */
 #undef CONFIG_NET_RETRY_COUNT
 #define CONFIG_NET_RETRY_COUNT 500
@@ -307,9 +310,8 @@ typedef struct {
 #define CONFIG_SYS_MAX_NAND_DEVICE	(CONFIG_IPQ_MAX_NAND_DEVICE + \
 					 CONFIG_IPQ_MAX_SPI_DEVICE)
 
-/* #define CONFIG_QCA_MMC */
-
 #define CONFIG_QCA_MMC
+
 #ifdef CONFIG_QCA_MMC
 #define CONFIG_CMD_MMC
 #define CONFIG_MMC
@@ -319,7 +321,6 @@ typedef struct {
 #define CONFIG_SYS_MMC_ENV_DEV  0
 #endif
 
-//#define CONFIG_SEC_AUTH	// default disable
 
 #define CONFIG_MTD_DEVICE
 #define CONFIG_MTD_PARTITIONS
@@ -328,15 +329,7 @@ typedef struct {
 #define CONFIG_RBTREE		/* for ubi */
 #define CONFIG_CMD_UBI
 #define CONFIG_BOOTCOMMAND	"bootipq"
-#define CONFIG_BOOTDELAY	2
+#define CONFIG_BOOTDELAY	3
 #define CONFIG_IPQ_FDT_HIGH	0x87000000
-
-#define CONFIG_CMD_MISC
-#define CONFIG_CMD_FAT
-#define CONFIG_QCOM_WATCHDOG
-#define CONFIG_LZMA
-#define CONFIG_SYS_LONGHELP
-#define CONFIG_CMD_LOADB
-#define CONFIG_AUTO_COMPLETE		1
 
 #endif /* _IPQCDP_H */

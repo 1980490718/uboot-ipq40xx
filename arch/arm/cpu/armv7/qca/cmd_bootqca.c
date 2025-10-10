@@ -194,6 +194,10 @@ static int do_boot_signedimg(cmd_tbl_t *cmdtp, int flag, int argc, char *const a
 			0, (void *)&val, sizeof(val));
 	/* check if we are in download mode */
 	if (val == DLOAD_MAGIC_COOKIE) {
+#ifdef CONFIG_IPQ_ETH_INIT_DEFER
+		puts("\nNet:   ");
+		eth_initialize(gd->bd);
+#endif
 		/* clear the magic and run the dump command */
 		val = 0x0;
 		ret = scm_call(SCM_SVC_BOOT, SCM_SVC_WR,
@@ -373,6 +377,10 @@ static int do_boot_unsignedimg(cmd_tbl_t *cmdtp, int flag, int argc, char *const
 			0, (void *)&val, sizeof(val));
 	/* check if we are in download mode */
 	if (val == DLOAD_MAGIC_COOKIE) {
+#ifdef CONFIG_IPQ_ETH_INIT_DEFER
+		puts("\nNet:   ");
+		eth_initialize(gd->bd);
+#endif
 		/* clear the magic and run the dump command */
 		val = 0x0;
 		ret = scm_call(SCM_SVC_BOOT, SCM_SVC_WR,
@@ -439,7 +447,7 @@ static int do_boot_unsignedimg(cmd_tbl_t *cmdtp, int flag, int argc, char *const
 				"set mtdids nand%d=nand%d && "
 				"set mtdparts mtdparts=nand%d:0x%llx@0x%llx(fs),${msmparts} && "
 				"ubi part fs && "
-				"ubi read 0x%x kernel && ", 
+				"ubi read 0x%x kernel && ",
 				gboard_param->spi_nand_available,
 				gboard_param->spi_nand_available,
 				gboard_param->spi_nand_available,
@@ -557,21 +565,16 @@ static int do_config_select(cmd_tbl_t *cmdtp, int flag, int argc, char *const ar
 {
 	int addr, ret;
 	char runcmd[256];
-
 	if (argc > 1)
 		addr = simple_strtol(argv[1], NULL, 16);
 	else
 		addr = CONFIG_SYS_LOAD_ADDR;
-
 	ret = config_select(addr, gboard_param->dtb_config_name,
-				runcmd, sizeof(runcmd));
-
+						runcmd, sizeof(runcmd));
 	if (!ret)
 		setenv("bootfdtcmd", runcmd);
-
 	return ret;
 }
-
 U_BOOT_CMD(cfgsel, 2, 0, do_config_select,
-	   "cfgsel select config from FIT image",
-	   "cfgsel [addr] - Select config from FIT image and set $bootfdtcmd\n");
+		"cfgsel select config from FIT image",
+		"cfgsel [addr] - Select config from FIT image and set $bootfdtcmd\n");

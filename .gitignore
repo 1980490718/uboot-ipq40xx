@@ -1,76 +1,81 @@
-# 构建产物目录
-/bin/
-*.zip
+#
+# NOTE! Don't add files that are generated in specific
+# subdirectories here. Add them in the ".gitignore" file
+# in that subdirectory instead.
+#
+# Normal rules
+#
 
-# 构建日志
-build.log
-build.clean.log
-
-# 中间文件（对象、静态库、汇编、链接脚本、大小图等）
+*.rej
+*.orig
+*.a
 *.o
 *.su
-*.a
-*.s
-*.elf
-*.bin
-*.map
-*.srec
-*.md5
-*.lds
+*~
+*.swp
 *.patch
+*.bin
 
-# 构建配置和依赖信息
-*.depend
-*.depend.*
-.depend
-**/.depend
-**/.depend.*
+#
+# Top-level generic files
+#
 
-# 特定目标文件
-u-boot
-u-boot.*
-u-boot.lds
-System.map
+/MLO
+/System.map
+/u-boot
+/u-boot.hex
+/u-boot.imx
+/u-boot.map
+/u-boot.srec
+/u-boot.ldr
+/u-boot.ldr.hex
+/u-boot.ldr.srec
+/u-boot.img
+/u-boot.kwb
+/u-boot.sha1
+/u-boot.dis
+/u-boot.lds
+/u-boot.ubl
+/u-boot.ais
+/u-boot.dtb
+/u-boot.sb
 
-# 自动生成的 include 和 config 文件
-/include/asm
-/include/autoconf.mk
-/include/autoconf.mk.dep
-/include/config.h
-/include/config.mk
+#
+# Generated files
+#
+
+*.depend*
+/LOG
+/errlog
+/reloc_off
+
 /include/generated/
+asm-offsets.s
 
-# 架构临时链接头
-/arch/arm/include/asm/arch
-/arch/arm/include/asm/proc
+# stgit generated dirs
+patches-*
+.stgit-edit.txt
 
-# 示例产物和中间文件
-/examples/standalone/hello_world*
-/examples/standalone/*.srec
-/examples/standalone/*.o
-/examples/standalone/*.su
-/examples/standalone/*.bin
+# quilt's files
+patches
+series
 
-# 工具构建目标
-/tools/dumpimage
-/tools/gen_eth_addr
-/tools/mkenvimage
-/tools/mkimage
-/tools/*.o
-/tools/*.su
-/tools/*.map
-/tools/envcrc
+# gdb files
+.gdb_history
 
-# 通用递归规则（确保子目录下中间产物也忽略）
-**/*.o
-**/*.su
-**/*.a
-**/*.map
-**/*.bin
-**/*.s
-**/*.srec
-**/*.elf
-**/*.md5
-**/*.depend*
-**/u-boot*
+# cscope files
+cscope.*
 
+# tags files
+/tags
+/ctags
+/etags
+
+# OneNAND IPL files
+/onenand_ipl/onenand-ipl*
+/onenand_ipl/board/*/onenand*
+/onenand_ipl/board/*/*.S
+
+/bin/
+*.zip
+/.vscode/

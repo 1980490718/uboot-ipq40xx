@@ -29,7 +29,7 @@ set -o pipefail
 
 # This script builds U-Boot for various boards based on the provided configuration files.
 # It supports building all boards, cleaning build files, and displaying help information.
-export STAGING_DIR=/home/a/1980490718/openwrt-sdk-ipq806x-qsdk53/staging_dir
+export STAGING_DIR=$(realpath .)/../openwrt-sdk-ipq806x-qsdk53/staging_dir
 export TOOLPATH=${STAGING_DIR}/toolchain-arm_cortex-a7_gcc-4.8-linaro_uClibc-1.0.14_eabi/
 export PATH=${TOOLPATH}/bin:${PATH}
 export MAKECMD="make --silent ARCH=arm CROSS_COMPILE=arm-openwrt-linux-"
@@ -111,7 +111,7 @@ build_board() {
 	${STAGING_DIR}/host/bin/sstrip "$out_elf"
 
 	# Generate fixed-size .bin image (512 KiB, padded with 0xFF)
-	local out_bin="${BUILD_TOPDIR}/bin/${board}-u-boot.bin"
+	local out_bin="${BUILD_TOPDIR}/bin/openwrt-ipq40xx-${board}-u-boot-stripped.bin"
 	dd if=/dev/zero bs=1k count=512 | tr '\000' '\377' > "$out_bin"
 	dd if="$out_elf" of="$out_bin" conv=notrunc
 	md5sum "$out_bin" > "${out_bin}.md5"

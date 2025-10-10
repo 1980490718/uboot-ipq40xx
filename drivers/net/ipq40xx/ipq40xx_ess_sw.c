@@ -69,6 +69,7 @@ int ipq40xx_ess_sw_init(ipq40xx_edma_board_cfg_t *cfg)
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+	case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C4:
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
@@ -80,7 +81,6 @@ int ipq40xx_ess_sw_init(ipq40xx_edma_board_cfg_t *cfg)
 	case MACH_TYPE_IPQ40XX_AP_DK07_1_C2:
 	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C6:
-	case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
 
 		ipq40xx_ess_sw_wr(S17_P0LOOKUP_CTRL_REG, 0x140000);
 		ipq40xx_ess_sw_wr(S17_P1LOOKUP_CTRL_REG, 0x140000);
