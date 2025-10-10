@@ -22,8 +22,6 @@
 
 #!/bin/bash
 
-#!/bin/bash
-
 set -e
 set -o pipefail
 
@@ -32,7 +30,18 @@ set -o pipefail
 export STAGING_DIR=$(realpath .)/../openwrt-sdk-ipq806x-qsdk53/staging_dir
 export TOOLPATH=${STAGING_DIR}/toolchain-arm_cortex-a7_gcc-4.8-linaro_uClibc-1.0.14_eabi/
 export PATH=${TOOLPATH}/bin:${PATH}
-export MAKECMD="make --silent ARCH=arm CROSS_COMPILE=arm-openwrt-linux-"
+
+# Detect number of CPU cores for parallel compilation
+# User can override with MAKE_JOBS environment variable
+if [ -n "$MAKE_JOBS" ]; then
+    JOB_COUNT="$MAKE_JOBS"
+else
+    JOB_COUNT=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)
+fi
+
+# Use single thread for configuration and dependencies, multi-thread for compilation
+export MAKECMD_SINGLE="make --silent ARCH=arm CROSS_COMPILE=arm-openwrt-linux-"
+export MAKECMD_MULTI="make --silent ARCH=arm CROSS_COMPILE=arm-openwrt-linux- -j${JOB_COUNT}"
 export CONFIG_BOOTDELAY=1
 export MAX_UBOOT_SIZE=524288
 
@@ -55,6 +64,9 @@ show_help() {
 	echo -e "  ${YELLOW}🧹clean${RESET}         Clean build files/logs"
 	echo -e "  ${YELLOW}🧹clean_all${RESET}     Clean build files and remove bin/ products/logs"
 	echo -e "  ${YELLOW}❓help${RESET}          Show this help message"
+	echo ""
+	echo "Environment variables:"
+	echo -e "  ${YELLOW}MAKE_JOBS${RESET}       Number of parallel jobs (default: auto-detected, currently ${JOB_COUNT})"
 	echo ""
 	echo "📄Supported board names:"
 	if [ -d "${UBOOT_DIR}/include/configs" ]; then
@@ -82,18 +94,27 @@ build_board() {
 		return 1
 	fi
 
-	echo -e "${CYAN}===> ⌛Building board: ${board}${RESET}" | tee -a "$LOGFILE"
+	echo -e "${CYAN}===> ⌛Building board: ${board} (using ${JOB_COUNT} threads for compilation)${RESET}" | tee -a "$LOGFILE"
 
 	# Create build directory if it doesn't exist
 	mkdir -p "${BUILD_TOPDIR}/bin"
 
-	# Configure U-Boot for the target board
-	echo "===> 🔧Configuring: ipq40xx_${board}_config" | tee -a "$LOGFILE"
-	(cd "$UBOOT_DIR" && ${MAKECMD} ipq40xx_${board}_config 2>&1) | tee -a "$LOGFILE"
+	# Clean any previous configuration
+	echo "===> 🧹Cleaning previous configuration..." | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD_SINGLE} distclean 2>&1) | tee -a "$LOGFILE"
 
-	# Compile U-Boot
-	echo "===> 🔄Compiling..." | tee -a "$LOGFILE"
-	(cd "$UBOOT_DIR" && ${MAKECMD} ENDIANNESS=-EB V=1 all 2>&1) | tee -a "$LOGFILE"
+	# Configure U-Boot for the target board (single thread for configuration)
+	echo "===> 🔧Configuring: ipq40xx_${board}_config" | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD_SINGLE} ipq40xx_${board}_config 2>&1) | tee -a "$LOGFILE"
+
+	# Build dependencies first (single thread to avoid race conditions)
+	echo "===> 🔨Building dependencies..." | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD_SINGLE} tools 2>&1) | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD_SINGLE} arch/arm/cpu/armv7/qca/asm-offsets.s 2>&1) | tee -a "$LOGFILE"
+
+	# Compile U-Boot with multiple threads
+	echo "===> 🔄Compiling with ${JOB_COUNT} threads..." | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD_MULTI} ENDIANNESS=-EB V=1 all 2>&1) | tee -a "$LOGFILE"
 
 	# Check if the compilation was successful
 	local uboot_out="${UBOOT_DIR}/u-boot"
