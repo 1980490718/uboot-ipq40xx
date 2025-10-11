@@ -22,6 +22,10 @@
 #
 
 include $(TOPDIR)/config.mk
+#ifdef CONFIG_HTTPD
+CPPFLAGS += -I$(TOPDIR)/board/qcom/ipq40xx_cdp -I$(TOPDIR)/board/qcom/common
+CFLAGS += -I$(TOPDIR)/board/qcom/ipq40xx_cdp -I$(TOPDIR)/board/qcom/common
+#endif
 
 # CFLAGS += -DDEBUG
 
@@ -39,6 +43,9 @@ COBJS-$(CONFIG_CMD_PING) += ping.o
 COBJS-$(CONFIG_CMD_RARP) += rarp.o
 COBJS-$(CONFIG_CMD_SNTP) += sntp.o
 COBJS-$(CONFIG_CMD_NET)  += tftp.o
+#ifdef CONFIG_HTTPD
+COBJS-$(CONFIG_HTTPD)  += httpd.o
+#endif
 
 COBJS	:= $(sort $(COBJS-y))
 SRCS	:= $(COBJS:.o=.c)

@@ -42,6 +42,16 @@
 #include <post.h>
 #include <linux/ctype.h>
 #include <menu.h>
+#ifdef CONFIG_HTTPD
+#include "ipq40xx_api.h"
+#include "ipq40xx_cdp.h"
+
+/* declarations near the top with other extern declarations */
+extern void LED_INIT(void);
+extern int gpio_get_value(int gpio);
+extern void gpio_set_value(int gpio, int value);
+extern void HttpdLoop(void);
+#endif
 
 #if defined(CONFIG_SILENT_CONSOLE) || defined(CONFIG_POST) || \
 	defined(CONFIG_CMDLINE_EDITING) || defined(CONFIG_IPQ_ETH_INIT_DEFER)
@@ -57,6 +67,10 @@ void show_boot_progress (int val) __attribute__((weak, alias("__show_boot_progre
 #if defined(CONFIG_UPDATE_TFTP)
 int update_tftp (ulong addr);
 #endif /* CONFIG_UPDATE_TFTP */
+
+#ifdef CONFIG_HTTPD
+int http_update = 0;
+#endif
 
 #define MAX_DELAY_STOP_STR 32
 
@@ -256,7 +270,7 @@ int abortboot(int bootdelay)
 		printf("\b\b\b%2d ", bootdelay);
 	}
 
-#ifdef CONFIG_IPQ_ETH_INIT_DEFER
+#if defined(CONFIG_IPQ_ETH_INIT_DEFER) && !defined(CONFIG_HTTPD)
 	if (abort) {
 		puts("\nNet:   ");
 		eth_initialize(gd->bd);
@@ -383,18 +397,160 @@ void main_loop (void)
 		s = getenv ("bootcmd");
 
 	debug ("### main_loop: bootcmd=\"%s\"\n", s ? s : "<UNDEFINED>");
+#ifdef CONFIG_HTTPD
+	int counter = 0;
+	LED_INIT();
+	int ret = -1;
+	(void)ret;
+	counter = 0;
+	/*http download*/
+	int gpio_reset_btn=0;
+	switch (gboard_param->machid) {
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+		gpio_reset_btn=18;
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+		gpio_reset_btn=40;
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+	case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
+		gpio_reset_btn=63;
+		break;
+	default:
+		break;
+	}
 
+	printf("Reset button GPIO%d initial value: %d\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
+	if (gpio_get_value(gpio_reset_btn) == GPIO_VAL_BTN_PRESSED) {
+		printf( "Press reset button for at least 3 seconds to enter web failsafe mode\n" );
+		printf( "Reset button held for: %2d second(s)", counter);
+	}
+	while (gpio_get_value(gpio_reset_btn) == GPIO_VAL_BTN_PRESSED) {
+
+		switch (gboard_param->machid) {
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
+		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+			break;
+		case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
+			gpio_set_value(GPIO_AP4220_POWER_LED, 1);
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+			break;
+		default:
+			break;
+		}
+		udelay( 500000 );
+
+		switch (gboard_param->machid) {
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
+		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+			break;
+		default:
+			break;
+		}
+
+		udelay( 500000 );
+
+		counter++;
+
+		//printf("%2d second(s), %ld\n", counter, get_timer(0));
+		printf("\b\b\b\b\b\b\b\b\b\b\b\b%2d second(s)", counter);
+
+		if ( counter >= 3 ){
+			break;
+		}
+
+		if (ctrlc()) {
+			goto mainloop;
+		}
+	}
+
+	if (counter > 2) {
+
+		//printf("\nReset button GPIO%d value: %d\n\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
+		printf( "Reset button was held for %d seconds\nHTTP server is starting for firmware update...\n", counter );
+	switch (gboard_param->machid) {
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+		break;
+	case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
+		gpio_set_value(GPIO_AP4220_POWER_LED, 1);
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+		break;
+	default:
+		break;
+	}
+
+		http_update = 1;
+		goto SKIPBOOT;
+
+	}
+# endif
 	if (bootdelay >= 0 && s && !abortboot (bootdelay)) {
 # ifdef CONFIG_AUTOBOOT_KEYED
 		int prev = disable_ctrlc(1);	/* disable Control C checking */
 # endif
-
+#ifdef CONFIG_HTTPD
+		int ret = run_command(s, 0);
+		if (ret) {
+			/* reset the board */
+			udelay( 1000000 );
+			do_reset( NULL, 0, 0, NULL );
+#else
 		run_command(s, 0);
+#endif
+		}
 
 # ifdef CONFIG_AUTOBOOT_KEYED
 		disable_ctrlc(prev);	/* restore Control C checking */
 # endif
 	}
+
+# ifdef CONFIG_HTTPD
+SKIPBOOT:
+	if (http_update) {
+		udelay(1000000);
+		HttpdLoop();
+	}
+# endif
 
 # ifdef CONFIG_MENUKEY
 	if (menukey == CONFIG_MENUKEY) {
@@ -408,6 +564,10 @@ void main_loop (void)
 	/*
 	 * Main Loop for Monitor Command Processing
 	 */
+#ifdef CONFIG_HTTPD
+mainloop:
+#endif
+
 #ifdef CONFIG_SYS_HUSH_PARSER
 	parse_file_outer();
 	/* This point is never reached */

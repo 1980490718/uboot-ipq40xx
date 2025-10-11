@@ -332,4 +332,11 @@ typedef struct {
 #define CONFIG_BOOTDELAY	3
 #define CONFIG_IPQ_FDT_HIGH	0x87000000
 
+#define CONFIG_HTTPD
+#define CONFIG_LEDS_BLINK_ENABLE
+#define CONFIG_BLINK_READ_WRITE_ENABLE
+#define CONFIG_WEB_MACRW
+#define CONFIG_WEB_SETENV
+#define CONFIG_BACKUP_FIRMWARE /* Console backup firmware feature */
+//#define CONFIG_WEB_BACKUP_FIRMWARE /* Web backup firmware feature */
 #endif /* _IPQCDP_H */

@@ -23,6 +23,9 @@
 #include <asm/arch-ipq40xx/smem.h>
 #include <mmc.h>
 #include "ipq40xx_cdp.h"
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+#include "ipq40xx_api.h"
+#endif
 
 #define DLOAD_MAGIC_COOKIE	0x10
 #define XMK_STR(x)		#x
@@ -355,7 +358,9 @@ static int do_boot_signedimg(cmd_tbl_t *cmdtp, int flag, int argc, char *const a
 
 	return CMD_RET_SUCCESS;
 }
-
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+extern void LED_BOOTING(void);
+#endif
 static int do_boot_unsignedimg(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 {
 #ifdef CONFIG_QCA_APPSBL_DLOAD
@@ -498,7 +503,9 @@ static int do_boot_unsignedimg(cmd_tbl_t *cmdtp, int flag, int argc, char *const
 #endif
 		return CMD_RET_FAILURE;
 	}
-
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	LED_BOOTING();
+#endif
 	dcache_enable();
 
 	ret = genimg_get_format((void *)CONFIG_SYS_LOAD_ADDR);

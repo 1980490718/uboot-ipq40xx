@@ -32,6 +32,9 @@
 #include <asm/arch-qcom-common/gpio.h>
 #include <asm/io.h>
 
+#include <common.h>
+#include "ipq40xx_api.h"
+#include "ipq40xx_cdp.h"
 /*******************************************************
 Function description: configure GPIO functinality
 Arguments :
@@ -45,6 +48,7 @@ unsigned int oe - 0 - Disable, 1- Enable.
 Return : None
 *******************************************************/
 
+extern board_ipq40xx_params_t *gboard_param;
 
 void gpio_tlmm_config(unsigned int gpio, unsigned int func,
 		unsigned int out, unsigned int pull,
@@ -85,4 +89,14 @@ void gpio_set_value(unsigned int gpio, unsigned int out)
 	val &= ~(0x2);
 	val |= out << 1;
 	writel(val, addr);
+}
+
+int gpio_get_value(unsigned int gpio)
+{
+	return readl((unsigned int *)GPIO_IN_OUT_ADDR(gpio));
+}
+
+void gpio_twinkle_value(unsigned int gpio_type)
+{
+	gpio_set_value(gpio_type, !gpio_get_value(gpio_type));
 }

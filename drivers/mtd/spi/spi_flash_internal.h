@@ -67,7 +67,11 @@ int spi_flash_cmd_read_fast(struct spi_flash *flash, u32 offset,
  * data. Used for programming the flash array, etc.
  */
 int spi_flash_cmd_write(struct spi_slave *spi, const u8 *cmd, size_t cmd_len,
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+		const void *data, size_t data_len, int twinkle_led);
+#else
 		const void *data, size_t data_len);
+#endif
 
 /*
  * Write the requested data out breaking it up into multiple write

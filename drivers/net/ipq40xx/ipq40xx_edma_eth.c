@@ -567,6 +567,10 @@ static int ipq40xx_eth_init(struct eth_device *eth_dev, bd_t *this)
 	fal_port_duplex_t duplex;
 	char *lstatus[] = {"up", "Down"};
 	char *dp[] = {"Half", "Full"};
+#ifdef CONFIG_HTTPD
+	(void)lstatus;
+	(void)dp;
+#endif
 	hw = &c_info->hw;
 	/*
 	 * Allocate the RX buffer
@@ -601,9 +605,11 @@ static int ipq40xx_eth_init(struct eth_device *eth_dev, bd_t *this)
 		case FAL_SPEED_10:
 		case FAL_SPEED_100:
 		case FAL_SPEED_1000:
+#ifndef CONFIG_HTTPD
 			printf ("eth%d PHY%d %s Speed :%d %s duplex\n",
 				priv->mac_unit, i, lstatus[status], speed,
 				dp[duplex]);
+#endif
 			break;
 		default:
 			printf("Unknown speed\n");

@@ -16,6 +16,10 @@
 #endif
 
 DECLARE_GLOBAL_DATA_PTR;
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+#include <asm/arch-qcom-common/gpio.h>
+#include "ipq40xx_api.h"
+#endif
 /* Well known TFTP port # */
 #define WELL_KNOWN_PORT	69
 /* Millisecs to timeout for lost pkt */
@@ -263,6 +267,10 @@ static void show_block_marker(void)
 			putc('#');
 		else if ((TftpBlock % (10 * HASHES_PER_LINE)) == 0)
 			puts("\n\t ");
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+		else if ((TftpBlock % (10 * 40)) == 0)
+			gpio_twinkle_value(led_tftp_transfer_flashing);
+#endif
 	}
 }
 
@@ -313,6 +321,10 @@ static void tftp_complete(void)
 	}
 #endif
 	puts("\ndone\n");
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	gpio_set_value(led_tftp_transfer_flashing, LED_OFF);
+	gpio_set_value(power_led, !power_led_active_low);
+#endif
 	net_set_state(NETLOOP_SUCCESS);
 }
 

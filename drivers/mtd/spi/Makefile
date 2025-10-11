@@ -22,6 +22,10 @@
 #
 
 include $(TOPDIR)/config.mk
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+CPPFLAGS += -I$(TOPDIR)/board/qcom/ipq40xx_cdp -I$(TOPDIR)/board/qcom/common
+CFLAGS += -I$(TOPDIR)/board/qcom/ipq40xx_cdp -I$(TOPDIR)/board/qcom/common
+#endif
 
 LIB	:= $(obj)libspi_flash.o
 

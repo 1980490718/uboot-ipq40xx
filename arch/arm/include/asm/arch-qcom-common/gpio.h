@@ -92,4 +92,7 @@ void gpio_tlmm_config(unsigned int gpio, unsigned int func,
 		unsigned int gpio_pu_res);
 
 void gpio_set_value(unsigned int gpio, unsigned int out);
+int gpio_get_value(unsigned int gpio);
+void gpio_twinkle_value(unsigned int gpio);
+
 #endif

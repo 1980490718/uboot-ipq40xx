@@ -49,6 +49,10 @@
 #include <linux/mtd/mtd.h>
 #include <nand.h>
 #include <jffs2/jffs2.h>
+#ifndef CONFIG_LEDS_BLINK_ENABLE
+#include "ipq40xx_api.h"
+#include "ipq40xx_cdp.h"
+#endif
 
 typedef struct erase_info erase_info_t;
 typedef struct mtd_info	  mtd_info_t;
@@ -56,6 +60,9 @@ typedef struct mtd_info	  mtd_info_t;
 /* support only for native endian JFFS2 */
 #define cpu_to_je16(x) (x)
 #define cpu_to_je32(x) (x)
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+static int led_twinkle_counter = 0;
+#endif
 
 /**
  * nand_erase_opts: - erase NAND flash with support for various options
@@ -68,6 +75,10 @@ typedef struct mtd_info	  mtd_info_t;
  * This code is ported from flash_eraseall.c from Linux mtd utils by
  * Arcom Control System Ltd.
  */
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+extern void gpio_twinkle_value(int gpio_num);
+extern int power_led;
+#endif
 int nand_erase_opts(nand_info_t *meminfo, const nand_erase_options_t *opts)
 {
 	struct jffs2_unknown_node cleanmarker;
@@ -181,6 +192,13 @@ int nand_erase_opts(nand_info_t *meminfo, const nand_erase_options_t *opts)
 			 * on (slow) serial consoles
 			 */
 			if (percent != percent_complete) {
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+				led_twinkle_counter++;
+				if (led_twinkle_counter == 5) {
+					gpio_twinkle_value(power_led);
+					led_twinkle_counter=0;
+				}
+#endif
 				percent_complete = percent;
 
 				printf("\rErasing at 0x%llx -- %3d%% complete.",

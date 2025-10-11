@@ -162,7 +162,11 @@ static int macronix_write_status(struct spi_flash *flash, u8 sr)
 	}
 
 	cmd = CMD_WRITE_STATUS;
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	ret = spi_flash_cmd_write(flash->spi, &cmd, 1, &sr, 1, 0);
+#else
 	ret = spi_flash_cmd_write(flash->spi, &cmd, 1, &sr, 1);
+#endif
 	if (ret) {
 		debug("SF: fail to write status register\n");
 		return ret;

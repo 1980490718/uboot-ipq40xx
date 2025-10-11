@@ -79,3 +79,4 @@ cscope.*
 /bin/
 *.zip
 /.vscode/
+/httpd/fsdata.c

@@ -14,6 +14,12 @@
 #include <watchdog.h>
 
 #include "spi_flash_internal.h"
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+#include <asm/arch-qcom-common/gpio.h>
+#include "ipq40xx_api.h"
+#include "ipq40xx_cdp.h"
+unsigned int spi_write_count = 0;
+#endif
 
 static void spi_flash_addr(struct spi_flash *flash, u32 addr, u8 *cmd)
 {
@@ -68,8 +74,21 @@ int spi_flash_cmd_read(struct spi_slave *spi, const u8 *cmd,
 }
 
 int spi_flash_cmd_write(struct spi_slave *spi, const u8 *cmd, size_t cmd_len,
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+		const void *data, size_t data_len, int twinkle_led)
+#else
 		const void *data, size_t data_len)
+#endif
 {
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	if ((spi_write_count % 500) == 0 && twinkle_led == 1) {
+		gpio_twinkle_value(led_upgrade_write_flashing_2);
+		if(led_upgrade_write_flashing_2 != led_upgrade_write_flashing_1)
+			gpio_twinkle_value(led_upgrade_write_flashing_1);
+		spi_write_count = 0;
+	}
+	spi_write_count++;
+#endif
 	return spi_flash_read_write(spi, cmd, cmd_len, data, NULL, data_len);
 }
 
@@ -84,7 +103,13 @@ int spi_flash_cmd_write_multi(struct spi_flash *flash, u32 offset,
 	page_size = flash->page_size;
 	page_addr = offset / page_size;
 	byte_addr = offset % page_size;
-
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	/*sync GPIO_2GWiFi_LED and GPIO_5GWiFi_LED*/
+	gpio_set_value(led_upgrade_write_flashing_1, LED_OFF);
+	gpio_set_value(led_upgrade_write_flashing_2, LED_OFF);
+	gpio_set_value(led_upgrade_erase_flashing, LED_OFF);
+	gpio_set_value(power_led, !power_led_active_low);
+#endif
 	ret = spi_claim_bus(flash->spi);
 	if (ret) {
 		debug("SF: unable to claim SPI bus\n");
@@ -116,7 +141,11 @@ int spi_flash_cmd_write_multi(struct spi_flash *flash, u32 offset,
 		}
 
 		ret = spi_flash_cmd_write(flash->spi, cmd, flash_cmdsz(flash),
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+					  buf + actual, chunk_len, 1);
+#else
 					  buf + actual, chunk_len);
+#endif
 		if (ret < 0) {
 			debug("SF: write failed\n");
 			break;
@@ -259,12 +288,19 @@ static int spi_flash_cmd_erase_block_or_sector(struct spi_flash *flash, u8 erase
 		debug("SF: Unable to claim SPI bus\n");
 		return ret;
 	}
-
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	if(led_upgrade_write_flashing_1 != led_upgrade_write_flashing_2)
+		gpio_set_value(led_upgrade_write_flashing_1, LED_OFF);
+		gpio_set_value(led_upgrade_write_flashing_2, LED_OFF);
+#endif
 	cmd[0] = erase_cmd;
 	start = offset;
 	end = start + len;
 
 	while (offset < end) {
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+		gpio_twinkle_value(led_upgrade_erase_flashing);
+#endif
 		spi_flash_addr(flash, offset, cmd);
 		offset += erase_size;
 
@@ -274,8 +310,11 @@ static int spi_flash_cmd_erase_block_or_sector(struct spi_flash *flash, u8 erase
 		ret = spi_flash_cmd_write_enable(flash);
 		if (ret)
 			goto out;
-
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+		ret = spi_flash_cmd_write(flash->spi, cmd, flash_cmdsz(flash), NULL, 0, 0);
+#else
 		ret = spi_flash_cmd_write(flash->spi, cmd, flash_cmdsz(flash), NULL, 0);
+#endif
 		if (ret)
 			goto out;
 
@@ -320,8 +359,11 @@ int spi_flash_cmd_berase(struct spi_flash *flash, u8 erase_cmd)
 	ret = spi_flash_cmd_write_enable(flash);
 	if (ret)
 		goto out;
-
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	ret = spi_flash_cmd_write(flash->spi, &erase_cmd, 1, NULL, 0, 1);
+#else
 	ret = spi_flash_cmd_write(flash->spi, &erase_cmd, 1, NULL, 0);
+#endif
 	if (ret)
 		goto out;
 

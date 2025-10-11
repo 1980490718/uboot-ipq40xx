@@ -54,6 +54,9 @@
 #include <jffs2/load_kernel.h>
 #include <asm/arch-qcom-common/clk.h>
 #include <asm/arch-ipq40xx/smem.h>
+#ifdef CONFIG_HTTPD
+#include "ipq40xx_api.h"
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -584,6 +587,32 @@ static void ipq40xx_edma_common_init(void)
 		MDIO_CTRL_0_MDC_MODE |
 		MDIO_CTRL_0_GPHY(0xa), MDIO_CTRL_0_REG);
 }
+#ifdef CONFIG_HTTPD
+void light_all_led(unsigned int machid)
+{
+	switch (machid) {
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+		break;
+	case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
+		mdelay(1);
+		writel(GPIO_OUT, GPIO_IN_OUT_ADDR(GPIO_AP4220_POWER_LED));
+		mdelay(1);
+		writel(GPIO_OUT, GPIO_IN_OUT_ADDR(GPIO_AP4220_2GWIFI_LED));
+		mdelay(1);
+		writel(GPIO_OUT, GPIO_IN_OUT_ADDR(GPIO_AP4220_5GWIFI_LED));
+		mdelay(1);
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+		break;
+	default:
+		break;
+	}
+}
+#endif
 
 int board_eth_init(bd_t *bis)
 {
@@ -594,6 +623,10 @@ int board_eth_init(bd_t *bis)
 	if (gpio) {
 		qca_configure_gpio(gpio, gboard_param->sw_gpio_count);
 	}
+#ifdef CONFIG_HTTPD
+	board_names_init();
+	light_all_led(gboard_param->machid);
+#endif
 	switch (gboard_param->machid) {
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
 	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:

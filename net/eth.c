@@ -423,8 +423,11 @@ int eth_init(bd_t *bis)
 
 		if (eth_current->init(eth_current, bis) >= 0) {
 			eth_current->state = ETH_STATE_ACTIVE;
-
+#ifdef CONFIG_HTTPD
+			return 1;
+#else
 			return 0;
+#endif
 		}
 		debug("FAIL\n");
 

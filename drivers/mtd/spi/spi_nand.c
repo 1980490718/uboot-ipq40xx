@@ -41,6 +41,7 @@ int verify_2bit_ecc(int status);
 int verify_dummy_ecc(int status);
 int verify_2bit_toshiba_ecc(int status);
 void gigadevice_norm_read_cmd(u8 *cmd, int column);
+void gigadevice_norm_read_cmd2(u8 *cmd, int column);
 void macronix_norm_read_cmd(u8 *cmd, int column);
 void winbond_norm_read_cmd(u8 *cmd, int column);
 void toshiba_norm_read_cmd(u8 *cmd, int column);
@@ -81,6 +82,22 @@ static struct spi_nand_flash_params spi_nand_flash_tbl[] = {
 		.verify_ecc = verify_3bit_ecc,
 		.die_select = NULL,
 		.name = "GD5F4GQ4XC",
+	},
+	{
+		.id = { 0x00, 0xc8, 0x51, 0xc8 },
+		.page_size = 2048,
+		.erase_size = 0x00020000,
+		.no_of_dies = 1,
+		.prev_die_id = INT_MAX,
+		.pages_per_die = 0x10000,
+		.pages_per_sector = 64,
+		.nr_sectors = 1024,
+		.oob_size = 128,
+		.protec_bpx = 0xC7,
+		.norm_read_cmd = gigadevice_norm_read_cmd2,
+		.verify_ecc = verify_2bit_ecc,
+		.die_select = NULL,
+		.name = "GD5F1GQ5UE",
 	},
 	{
 		.id = { 0xff, 0x9b, 0x12 , 0x9b },
@@ -184,6 +201,14 @@ void macronix_norm_read_cmd(u8 *cmd, int column)
 	cmd[3] = 0;
 }
 
+void gigadevice_norm_read_cmd2(u8 *cmd, int column)
+{
+	cmd[0] = IPQ40XX_SPINAND_CMD_NORM_READ;
+	cmd[1] = (u8)(column >> 8);
+	cmd[2] = (u8)(column);
+	cmd[3] = 0;
+}
+
 void winbond_norm_read_cmd(u8 *cmd, int column)
 {
 	cmd[0] = IPQ40XX_SPINAND_CMD_NORM_READ;
@@ -259,7 +284,11 @@ int spi_nand_die_select(struct mtd_info *mtd, struct spi_flash *flash,
 
 	cmd[0] = IPQ40XX_SPINAND_CMD_DIESELECT;
 	cmd[1] = die_id;
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	ret = spi_flash_cmd_write(flash->spi, cmd, 2, NULL, 0, 0);
+#else
 	ret = spi_flash_cmd_write(flash->spi, cmd, 2, NULL, 0);
+#endif
 	if (ret) {
 		printf("%s  failed for die select :\n", __func__);
 		return ret;
@@ -324,8 +353,11 @@ static int spi_nand_erase(struct mtd_info *mtd, struct erase_info *instr)
 	cmd[1] = (u8)(page >> 16);
 	cmd[2] = (u8)(page >> 8);
 	cmd[3] = (u8)(page);
-
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	ret = spi_flash_cmd_write(flash->spi, cmd, 4, NULL, 0, 1);
+#else
 	ret = spi_flash_cmd_write(flash->spi, cmd, 4, NULL, 0);
+#endif
 	if (ret) {
 		printf("%s  failed for offset:%ld\n", __func__, (long)instr->addr);
 		goto out;
@@ -382,7 +414,11 @@ static int spi_nand_block_isbad(struct mtd_info *mtd, loff_t offs)
 	cmd[1] = (u8)(page >> 16);
 	cmd[2] = (u8)(page >> 8);
 	cmd[3] = (u8)(page);
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	ret = spi_flash_cmd_write(flash->spi, cmd, 4, NULL, 0, 0);
+#else
 	ret = spi_flash_cmd_write(flash->spi, cmd, 4, NULL, 0);
+#endif
 	if (ret) {
 		printf("%s: write command failed\n", __func__);
 		goto out;
@@ -437,8 +473,11 @@ static int spinand_write_oob_std(struct mtd_info *mtd, struct nand_chip *chip,
 	cmd[0] = IPQ40XX_SPINAND_CMD_PLOAD;
 	cmd[1] = (u8)(column >> 8);
 	cmd[2] = (u8)(column);
-
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	ret = spi_flash_cmd_write(flash->spi, cmd, 3, wbuf, ops->ooblen, 1);
+#else
 	ret = spi_flash_cmd_write(flash->spi, cmd, 3, wbuf, ops->ooblen);
+#endif
 	if (ret) {
 		printf("%s: write command failed\n", __func__);
 		ret = 1;
@@ -449,8 +488,11 @@ static int spinand_write_oob_std(struct mtd_info *mtd, struct nand_chip *chip,
 	cmd[1] = (u8)(page >> 16);
 	cmd[2] = (u8)(page >> 8);
 	cmd[3] = (u8)(page);
-
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+	ret = spi_flash_cmd_write(flash->spi, cmd, 4, NULL, 0, 1);
+#else
 	ret = spi_flash_cmd_write(flash->spi, cmd, 4, NULL, 0);
+#endif
 	if (ret) {
 		printf("PLOG failed\n");
 		goto out;
@@ -614,7 +656,11 @@ static int spi_nand_read_std(struct mtd_info *mtd, loff_t from, struct mtd_oob_o
 		cmd[1] = (u8)(page >> 16);
 		cmd[2] = (u8)(page >> 8);
 		cmd[3] = (u8)(page);
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+		ret = spi_flash_cmd_write(flash->spi, cmd, 4, NULL, 0, 0);
+#else
 		ret = spi_flash_cmd_write(flash->spi, cmd, 4, NULL, 0);
+#endif
 		if (ret) {
 			printf("%s: write command failed\n", __func__);
 			goto out;
@@ -752,7 +798,11 @@ static int spi_nand_write_std(struct mtd_info *mtd, loff_t to, struct mtd_oob_op
 		cmd[0] = IPQ40XX_SPINAND_CMD_PLOAD;
 		cmd[1] = 0;
 		cmd[2] = 0;
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+		ret = spi_flash_cmd_write(flash->spi, cmd, 3, wbuf, bytes, 1);
+#else
 		ret = spi_flash_cmd_write(flash->spi, cmd, 3, wbuf, bytes);
+#endif
 		if (ret) {
 			printf("%s: write command failed\n", __func__);
 			goto out;
@@ -762,8 +812,11 @@ static int spi_nand_write_std(struct mtd_info *mtd, loff_t to, struct mtd_oob_op
 		cmd[1] = (u8)(page >> 16);
 		cmd[2] = (u8)(page >> 8);
 		cmd[3] = (u8)(page);
-
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+		ret = spi_flash_cmd_write(flash->spi, cmd, 4, NULL, 0, 1);
+#else
 		ret = spi_flash_cmd_write(flash->spi, cmd, 4, NULL, 0);
+#endif
 		if (ret) {
 			printf("PLOG failed\n");
 			goto out;
@@ -905,7 +958,11 @@ static int spinand_unlock_protect(struct mtd_info *mtd)
 		cmd[0] = IPQ40XX_SPINAND_CMD_SETFEA;
 		cmd[1] = IPQ40XX_SPINAND_PROTEC_REG;
 		cmd[2] = (u8)status;
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+		ret = spi_flash_cmd_write(flash->spi, cmd, 3, NULL, 0, 0);
+#else
 		ret = spi_flash_cmd_write(flash->spi, cmd, 3, NULL, 0);
+#endif
 		if (ret) {
 			printf("Failed to unblock sectors\n");
 			goto out;
@@ -954,8 +1011,11 @@ void spinand_internal_ecc(struct mtd_info *mtd, int enable)
 		} else {
 			cmd[2] = status & ~(IPQ40XX_SPINAND_FEATURE_ECC_EN);
 		}
-
+#ifdef CONFIG_LEDS_BLINK_ENABLE
+		ret = spi_flash_cmd_write(flash->spi, cmd, 3, NULL, 0, 0);
+#else
 		ret = spi_flash_cmd_write(flash->spi, cmd, 3, NULL, 0);
+#endif
 		if (ret) {
 			printf("Internal ECC enable failed\n");
 			goto out;
