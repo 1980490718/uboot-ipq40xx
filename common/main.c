@@ -398,132 +398,11 @@ void main_loop (void)
 
 	debug ("### main_loop: bootcmd=\"%s\"\n", s ? s : "<UNDEFINED>");
 #ifdef CONFIG_HTTPD
-	int counter = 0;
-	LED_INIT();
-	int ret = -1;
-	(void)ret;
-	counter = 0;
-	/*http download*/
-	int gpio_reset_btn=0;
-	switch (gboard_param->machid) {
-	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
-	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
-	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
-	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
-		gpio_reset_btn=18;
-		break;
-	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
-		gpio_reset_btn=40;
-		break;
-	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
-	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
-	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
-	case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
-		gpio_reset_btn=63;
-		break;
-	default:
-		break;
-	}
-
-	printf("Reset button GPIO%d initial value: %d\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
-	if (gpio_get_value(gpio_reset_btn) == GPIO_VAL_BTN_PRESSED) {
-		printf( "Press reset button for at least 3 seconds to enter web failsafe mode\n" );
-		printf( "Reset button held for: %2d second(s)", counter);
-	}
-	while (gpio_get_value(gpio_reset_btn) == GPIO_VAL_BTN_PRESSED) {
-
-		switch (gboard_param->machid) {
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
-			break;
-		case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
-			gpio_set_value(GPIO_AP4220_POWER_LED, 1);
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
-			break;
-		default:
-			break;
-		}
-		udelay( 500000 );
-
-		switch (gboard_param->machid) {
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
-			break;
-		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
-			break;
-		default:
-			break;
-		}
-
-		udelay( 500000 );
-
-		counter++;
-
-		//printf("%2d second(s), %ld\n", counter, get_timer(0));
-		printf("\b\b\b\b\b\b\b\b\b\b\b\b%2d second(s)", counter);
-
-		if ( counter >= 3 ){
-			break;
-		}
-
-		if (ctrlc()) {
-			goto mainloop;
-		}
-	}
-
-	if (counter > 2) {
-
-		//printf("\nReset button GPIO%d value: %d\n\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
-		printf( "Reset button was held for %d seconds\nHTTP server is starting for firmware update...\n", counter );
-	switch (gboard_param->machid) {
-	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
-		break;
-	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
-		break;
-	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
-		break;
-	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
-	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
-		break;
-	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
-		break;
-	case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
-		gpio_set_value(GPIO_AP4220_POWER_LED, 1);
-		break;
-	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
-		break;
-	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
-		break;
-	default:
-		break;
-	}
-
+	if (check_reset_button_for_web_failsafe()) {
 		http_update = 1;
 		goto SKIPBOOT;
-
 	}
-# endif
+#endif
 	if (bootdelay >= 0 && s && !abortboot (bootdelay)) {
 # ifdef CONFIG_AUTOBOOT_KEYED
 		int prev = disable_ctrlc(1);	/* disable Control C checking */
@@ -564,9 +443,6 @@ SKIPBOOT:
 	/*
 	 * Main Loop for Monitor Command Processing
 	 */
-#ifdef CONFIG_HTTPD
-mainloop:
-#endif
 
 #ifdef CONFIG_SYS_HUSH_PARSER
 	parse_file_outer();

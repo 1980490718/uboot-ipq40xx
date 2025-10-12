@@ -5,6 +5,9 @@
 #define _DEBUG	0
 #endif
 
+/* Function to check if reset button is pressed for web failsafe mode */
+int check_reset_button_for_web_failsafe(void);
+
 /* Debug and configuration options */
 //#define CHECK_ART_REGION
 //#undef CHECK_ART_REGION

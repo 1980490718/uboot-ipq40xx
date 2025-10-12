@@ -4,12 +4,17 @@
 #include "ipq40xx_cdp.h"
 #include <../../../arch/arm/include/asm/mach-types.h>
 #include <asm/arch-qcom-common/gpio.h>
+#include <watchdog.h>
 
 #define BUFFERSIZE 2048
 #define CHECK_ADDR(addr, val) (*(volatile unsigned char *)(addr) == (val))
 
 void get_mmc_part_info(void);
 void HttpdLoop(void);
+
+extern void LED_INIT(void);
+extern int gpio_get_value(unsigned int gpio);
+extern void gpio_set_value(unsigned int gpio, unsigned int value);
 
 const char* get_board_type_str_machid(unsigned int machid) {
 	switch (machid) {
@@ -30,6 +35,7 @@ const char* get_board_type_str_machid(unsigned int machid) {
 	case MACH_TYPE_IPQ40XX_DB_DK01_1_C1: return "DB_DK01_1_C1";		//0x1010002
 	case MACH_TYPE_IPQ40XX_DB_DK02_1_C1: return "DB_DK02_1_C1";		//0x1010003
 	case MACH_TYPE_IPQ40XX_TB832: return "TB832";					//0x1010004
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C6: return "AP_DK04_1_C6";		//0x8010401
 	default: return "Unknown";
 	}
 }
@@ -64,16 +70,7 @@ static void print_upgrade_header(const char *upgrade_type_name) {
 int do_http_upgrade(const ulong size, const int upgrade_type) {
 	char cmd[128] = {0};
 	int fw_type = do_checkout_firmware();
-	if (upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_UBOOT) {
-		print_upgrade_header("    U-BOOT UPGRADING    ");
-		sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x%x 0x%x 0x%lx",
-				CONFIG_UBOOT_START, CONFIG_UBOOT_SIZE, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, CONFIG_UBOOT_START, size);
-		if (size > CONFIG_UBOOT_SIZE)
-			return 0;
-		run_command(cmd, 0);
-		return 0;
-	}
-	else if (upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_FIRMWARE || upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_QSDK_FIRMWARE) {
+	if (upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_FIRMWARE || upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_QSDK_FIRMWARE) {
 		print_upgrade_header("   FIRMWARE UPGRADING   ");
 		if (fw_type == FW_TYPE_OPENWRT) {
 			switch (gboard_param->machid) {
@@ -124,6 +121,15 @@ int do_http_upgrade(const ulong size, const int upgrade_type) {
 		else {
 			sprintf(cmd, "sf probe && imgaddr=0x%x && source $imgaddr:script", WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
 		}
+		run_command(cmd, 0);
+		return 0;
+	}
+	else if (upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_UBOOT) {
+		print_upgrade_header("    U-BOOT UPGRADING    ");
+		sprintf(cmd, "sf probe && sf erase 0x%x 0x%x && sf write 0x%x 0x%x 0x%lx",
+				CONFIG_UBOOT_START, CONFIG_UBOOT_SIZE, WEBFAILSAFE_UPLOAD_RAM_ADDRESS, CONFIG_UBOOT_START, size);
+		if (size > CONFIG_UBOOT_SIZE)
+			return 0;
 		run_command(cmd, 0);
 		return 0;
 	}
@@ -179,6 +185,8 @@ void LED_INIT(void) {
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+			break;
+		case MACH_TYPE_IPQ40XX_AP_DK04_1_C5:
 			break;
 		default:
 			break;
@@ -294,4 +302,145 @@ U_BOOT_CMD(
 	"Start HTTPD web failsafe server",
 	"\n    Starts the failsafe web interface for firmware upgrade."
 );
+
+static int get_reset_button_gpio(void) {
+	switch (gboard_param->machid) {
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+		return 18;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+		return 40;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+	case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
+		return 63;
+	default:
+		return -1;
+	}
+}
+
+static void handle_led_press_indication(void) {
+	switch (gboard_param->machid) {
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+		break;
+	case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
+		gpio_set_value(GPIO_AP4220_POWER_LED, 1);
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C4:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C5:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK05_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK06_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C2:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+		break;
+	case MACH_TYPE_IPQ40XX_DB_DK01_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_DB_DK02_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_TB832:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C6:
+		break;
+	default:
+		break;
+	}
+}
+
+static void handle_led_success_indication(void) {
+	switch (gboard_param->machid) {
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_S1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
+		break;
+	case MACH_TYPE_IPQ40XX_ALIYUN_AP4220:
+		gpio_set_value(GPIO_AP4220_POWER_LED, 1);
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C4:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C2:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C5:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK05_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK06_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C2:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK07_1_C3:
+		break;
+	case MACH_TYPE_IPQ40XX_DB_DK01_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_DB_DK02_1_C1:
+		break;
+	case MACH_TYPE_IPQ40XX_TB832:
+		break;
+	case MACH_TYPE_IPQ40XX_AP_DK04_1_C6:
+		break;
+	default:
+		break;
+	}
+}
+
+int check_reset_button_for_web_failsafe(void) {
+	int counter = 0;
+	LED_INIT();
+	int gpio_reset_btn = get_reset_button_gpio();
+	if (gpio_reset_btn < 0) {
+		return 0;
+	}
+	printf("Reset button GPIO%d initial value: %d\n", gpio_reset_btn, gpio_get_value(gpio_reset_btn));
+	if (gpio_get_value(gpio_reset_btn) == GPIO_VAL_BTN_PRESSED) {
+		printf("Press and hold reset button for 3 seconds to enter web failsafe mode\n");
+		printf("Reset button held for: %2d second(s)", counter);
+	}
+	while (gpio_get_value(gpio_reset_btn) == GPIO_VAL_BTN_PRESSED) {
+		handle_led_press_indication();
+		udelay(500000);
+		udelay(500000);
+		counter++;
+		printf("\b\b\b\b\b\b\b\b\b\b\b\b%2d second(s)", counter);
+		if (counter >= 3) {
+			break;
+		}
+		if (ctrlc()) {
+			return 0;
+		}
+		WATCHDOG_RESET();
+	}
+	if (counter >= 3) {
+		printf("\nHTTP server is starting for firmware update...\n");
+		handle_led_success_indication();
+		return 1;
+	}
+	return 0;
+}
 #endif
