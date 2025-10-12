@@ -1706,11 +1706,17 @@ restart:
 
 			net_cleanup_loop();
 			eth_halt();
+#ifdef CONFIG_HTTPD
+			puts("Exiting web failsafe mode...\n");
+#else
 			puts("\nAbort\n");
+#endif
 			/* include a debug print as well incase the debug
 			   messages are directed to stderr */
 			debug_cond(DEBUG_INT_STATE, "--- NetLoop Abort!\n");
+#ifndef CONFIG_HTTPD
 			do_reset(NULL, 0, 0, NULL);
+#endif
 			goto done;
 		}
 
