@@ -174,4 +174,4 @@ else
 	fi
 fi
 
-echo "$res [${VERSION_CODE:-"local"},${REVISION:-"local"}]"
+echo "$res"
