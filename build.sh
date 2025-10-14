@@ -27,10 +27,21 @@ set -o pipefail
 
 # This script builds U-Boot for various boards based on the provided configuration files.
 # It supports building all boards, cleaning build files, and displaying help information.
-export STAGING_DIR=/home/a/1980490718/openwrt-sdk-ipq806x-qsdk53/staging_dir
+export STAGING_DIR=$(realpath .)/../openwrt-sdk-ipq806x-qsdk53/staging_dir
 export TOOLPATH=${STAGING_DIR}/toolchain-arm_cortex-a7_gcc-4.8-linaro_uClibc-1.0.14_eabi/
 export PATH=${TOOLPATH}/bin:${PATH}
-export MAKECMD="make --silent ARCH=arm CROSS_COMPILE=arm-openwrt-linux-"
+
+# Detect number of CPU cores for parallel compilation
+# User can override with MAKE_JOBS environment variable
+if [ -n "$MAKE_JOBS" ]; then
+    JOB_COUNT="$MAKE_JOBS"
+else
+    JOB_COUNT=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)
+fi
+
+# Use single thread for configuration and dependencies, multi-thread for compilation
+export MAKECMD_SINGLE="make --silent ARCH=arm CROSS_COMPILE=arm-openwrt-linux-"
+export MAKECMD_MULTI="make --silent ARCH=arm CROSS_COMPILE=arm-openwrt-linux- -j${JOB_COUNT}"
 export CONFIG_BOOTDELAY=1
 export MAX_UBOOT_SIZE=524288
 
@@ -41,7 +52,7 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 RESET='\033[0m'
 
-# Directory containing U-Boot source code
+# Directory containing U-Boot source code (current directory)
 UBOOT_DIR="uboot"
 
 # Function to show help information
@@ -53,6 +64,9 @@ show_help() {
 	echo -e "  ${YELLOW}🧹clean${RESET}         Clean build files/logs"
 	echo -e "  ${YELLOW}🧹clean_all${RESET}     Clean build files and remove bin/ products/logs"
 	echo -e "  ${YELLOW}❓help${RESET}          Show this help message"
+	echo ""
+	echo "Environment variables:"
+	echo -e "  ${YELLOW}MAKE_JOBS${RESET}       Number of parallel jobs (default: auto-detected, currently ${JOB_COUNT})"
 	echo ""
 	echo "📄Supported board names:"
 	if [ -d "${UBOOT_DIR}/include/configs" ]; then
@@ -80,18 +94,27 @@ build_board() {
 		return 1
 	fi
 
-	echo -e "${CYAN}===> ⌛Building board: ${board}${RESET}" | tee -a "$LOGFILE"
+	echo -e "${CYAN}===> ⌛Building board: ${board} (using ${JOB_COUNT} threads for compilation)${RESET}" | tee -a "$LOGFILE"
 
 	# Create build directory if it doesn't exist
 	mkdir -p "${BUILD_TOPDIR}/bin"
 
-	# Configure U-Boot for the target board
-	echo "===> 🔧Configuring: ipq40xx_${board}_config" | tee -a "$LOGFILE"
-	(cd "$UBOOT_DIR" && ${MAKECMD} ipq40xx_${board}_config 2>&1) | tee -a "$LOGFILE"
+	# Clean any previous configuration
+	echo "===> 🧹Cleaning previous configuration..." | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD_SINGLE} distclean 2>&1) | tee -a "$LOGFILE"
 
-	# Compile U-Boot
-	echo "===> 🔄Compiling..." | tee -a "$LOGFILE"
-	(cd "$UBOOT_DIR" && ${MAKECMD} ENDIANNESS=-EB V=1 all 2>&1) | tee -a "$LOGFILE"
+	# Configure U-Boot for the target board (single thread for configuration)
+	echo "===> 🔧Configuring: ipq40xx_${board}_config" | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD_SINGLE} ipq40xx_${board}_config 2>&1) | tee -a "$LOGFILE"
+
+	# Build dependencies first (single thread to avoid race conditions)
+	echo "===> 🔨Building dependencies..." | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD_SINGLE} tools 2>&1) | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD_SINGLE} arch/arm/cpu/armv7/qca/asm-offsets.s 2>&1) | tee -a "$LOGFILE"
+
+	# Compile U-Boot with multiple threads
+	echo "===> 🔄Compiling with ${JOB_COUNT} threads..." | tee -a "$LOGFILE"
+	(cd "$UBOOT_DIR" && ${MAKECMD_MULTI} ENDIANNESS=-EB V=1 all 2>&1) | tee -a "$LOGFILE"
 
 	# Check if the compilation was successful
 	local uboot_out="${UBOOT_DIR}/u-boot"
@@ -102,14 +125,14 @@ build_board() {
 
 	# Generate stripped ELF file
 	# Copy u-boot to a temporary location
-	local out_elf="${BUILD_TOPDIR}/bin/openwrt-${board}-u-boot-stripped.elf"
+	local out_elf="${BUILD_TOPDIR}/bin/openwrt-ipq40xx-${board}-u-boot-stripped.elf"
 	cp "$uboot_out" "$out_elf"
 
 	# Strip ELF using sstrip
 	${STAGING_DIR}/host/bin/sstrip "$out_elf"
 
 	# Generate fixed-size .bin image (512 KiB, padded with 0xFF)
-	local out_bin="${BUILD_TOPDIR}/bin/${board}-u-boot.bin"
+	local out_bin="${BUILD_TOPDIR}/bin/openwrt-ipq40xx-${board}-u-boot-stripped.bin"
 	dd if=/dev/zero bs=1k count=512 | tr '\000' '\377' > "$out_bin"
 	dd if="$out_elf" of="$out_bin" conv=notrunc
 	md5sum "$out_bin" > "${out_bin}.md5"
@@ -136,7 +159,7 @@ build_board() {
 	sed -r 's/\x1B\[[0-9;]*[a-zA-Z]//g; s/[[:cntrl:]]//g; s/[^[:print:]\t]//g' build.log > build.clean.log
 
 	# Package the ELF and BIN files with MD5 checksums in a ZIP file
-	# Add a timestamp to the ZIP 
+	# Add a timestamp to the ZIP
 	local timestamp=$(date +%Y%m%d_%H%M%S)
 	local zipfile="bin/u-boot-${board}-${timestamp}.zip"
 	zip -9j "$zipfile" "$out_elf" "$out_elf.md5" "$out_bin" "$out_bin.md5" build.clean.log > /dev/null
@@ -173,8 +196,8 @@ case "$1" in
 		# Clean build files/logs
 		export BUILD_TOPDIR=$(pwd)
 		echo -e "${YELLOW}===> 🧹Performing distclean...${RESET}"
-		(cd ${BUILD_TOPDIR}/uboot && ARCH=arm CROSS_COMPILE=arm-openwrt-linux- make --silent distclean) 2>/dev/null
-		rm -f ${BUILD_TOPDIR}/uboot/httpd/fsdata.c
+		(cd ${UBOOT_DIR} && ARCH=arm CROSS_COMPILE=arm-openwrt-linux- make --silent distclean) 2>/dev/null
+		rm -f ${UBOOT_DIR}/httpd/fsdata.c
 		rm -f ${BUILD_TOPDIR}/*.log
 		echo -e "${GREEN}===> 🧹Performing distclean completed${RESET}"
 		;;
