@@ -207,7 +207,6 @@ typedef struct {
 
 /* CMDS */
 #define CONFIG_CMD_RUN
-#define CONFIG_CMD_HTTPD 1
 /*
  * NAND Flash Configs
  */

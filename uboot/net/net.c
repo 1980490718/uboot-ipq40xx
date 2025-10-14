@@ -1489,12 +1489,6 @@ void print_IPaddr (IPaddr_t x)
 	puts (tmp);
 }
 
-#if 1 /* for web failsafe mod , added by kyson<luoweilong@gl-inet.com> */
-
-/**********************************************************************************
- * HTTPD section
- */
-
 #define BUF	((struct uip_eth_hdr *)&uip_buf[0])
 
 void NetSendHttpd( void ){
@@ -1709,11 +1703,17 @@ restart:
 
 			net_cleanup_loop();
 			eth_halt();
+#ifdef CONFIG_HTTPD
+			puts("Exiting web failsafe mode...\n");
+#else
 			puts("\nAbort\n");
+#endif
 			/* include a debug print as well incase the debug
 			   messages are directed to stderr */
 			debug_cond(DEBUG_INT_STATE, "--- NetLoop Abort!\n");
+#ifndef CONFIG_HTTPD
 			do_reset(NULL, 0, 0, NULL);
+#endif
 			goto done;
 		}
 
@@ -1775,7 +1775,5 @@ done:
 
 	return ret;
 }
-
-#endif
 
 #endif
