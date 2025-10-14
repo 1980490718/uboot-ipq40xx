@@ -184,7 +184,11 @@ endif
 ARFLAGS = $(error update your Makefile to use cmd_link_o_target and not AR)
 RELFLAGS= $(PLATFORM_RELFLAGS)
 DBGFLAGS= -g # -DDEBUG
+ifdef CONFIG_ARM
+OPTFLAGS= -Os -ffunction-sections -fdata-sections -fmerge-all-constants
+else
 OPTFLAGS= -Os #-fomit-frame-pointer
+endif
 
 OBJCFLAGS += --gap-fill=0xff
 
