@@ -512,11 +512,12 @@ ifeq ($(CONFIG_KALLSYMS),y)
 		$(GEN_UBOOT) $(obj)common/system_map.o
 endif
 
-$(OBJS):	depend
-	@sed -i "s/version:.*</version:`date +%y.%m.%d`</g" $(TOPDIR)/httpd/vendors/cleanwrt/uboot.html
-	@sed -i "s/version:.*</version:`date +%y.%m.%d`</g" $(TOPDIR)/httpd/vendors/cleanwrt/art.html
-	@sed -i "s/version:.*</version:`date +%y.%m.%d`</g" $(TOPDIR)/httpd/vendors/cleanwrt/index.html
-	@sed -i "s/version:.*</version:`date +%y.%m.%d`</g" $(TOPDIR)/httpd/vendors/cleanwrt/flashing.html
+$(OBJS):	depend $(VERSION_FILE) $(TIMESTAMP_FILE)
+		@VERSION=`grep '^#define U_BOOT_VERSION' $(VERSION_FILE) | sed 's/^#define U_BOOT_VERSION "U-Boot //;s/"$$//'`; \
+		DATE=`grep '^#define U_BOOT_DATE' $(TIMESTAMP_FILE) | sed 's/^#define U_BOOT_DATE "//;s/"$$//'`; \
+		TIME=`grep '^#define U_BOOT_TIME' $(TIMESTAMP_FILE) | sed 's/^#define U_BOOT_TIME "//;s/"$$//'`; \
+		VERSION_STR="Version:$$VERSION ($$DATE $$TIME)"; \
+		sed -i 's/Version:[^<"]*/'"$$VERSION_STR"'/' $(TOPDIR)/httpd/vendors/pig/*.html
 		$(MAKE) -C $(CPUDIR) $(if $(REMOTE_BUILD),$@,$(notdir $@))
 
 $(LIBS):	depend $(SUBDIR_TOOLS)
