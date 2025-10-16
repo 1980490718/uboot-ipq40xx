@@ -223,6 +223,12 @@ case "$1" in
 		boards=$(find "${UBOOT_DIR}/include/configs" -maxdepth 1 -name 'ipq40xx_*.h' | sed 's|.*/ipq40xx_||; s|\.h$||' | sort)
 		for board in $boards; do
 			build_board "$board"
+			# Call existing clean function after each board compilation
+			echo -e "${YELLOW}===> 🧹Cleaning after building $board...${RESET}"
+			$0 clean
+			# Restore HTML files to void dirty status,if someone needed to modify the html files,should delete blow two lines.
+			echo -e "${GREEN}===> 🧹Restoring HTML files in uboot/httpd/vendors/pig/...${RESET}"
+			git restore uboot/httpd/vendors/pig/*.html
 		done
 		;;
 	"")
