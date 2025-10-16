@@ -69,19 +69,9 @@ jobs:
         echo "BUILD_DATETIME=${current_datetime}" >> $GITHUB_ENV
         echo "TODAY_ISO=${today_iso}" >> $GITHUB_ENV
 
-        # Setup toolchain
-        STAGING_DIR="$GITHUB_WORKSPACE/openwrt-sdk-ipq806x-qsdk53/staging_dir"
-        TOOLCHAIN_PATH="$STAGING_DIR/toolchain-arm_cortex-a7_gcc-4.8-linaro_uClibc-1.0.14_eabi"
-
-        echo "$TOOLCHAIN_PATH/bin:$STAGING_DIR/host/bin" >> $GITHUB_PATH
-        echo "STAGING_DIR=$STAGING_DIR" >> $GITHUB_ENV
-
     - name: Build U-Boot
       working-directory: ./uboot-ipq40xx
       run: |
-        # Simple build info
-        echo "Build started: $BUILD_DATETIME ($TZ)" > build-info.txt
-
         # Build command
         if [[ "${{ github.event.inputs.board_name }}" != "" && "${{ github.event.inputs.board_name }}" != "all" ]]; then
           ./build.sh "${{ github.event.inputs.board_name }}"
@@ -91,30 +81,14 @@ jobs:
           ./build.sh all
         fi
 
-        echo "Build completed: $(date +'%Y-%m-%d %H:%M:%S')" >> build-info.txt
-
     - name: Archive artifacts
       if: success()
       uses: actions/upload-artifact@v4
       with:
         name: u-boot-artifacts-${{ env.BUILD_DATE }}
         path: |
-          uboot-ipq40xx/bin/*.bin
-          uboot-ipq40xx/bin/*.elf
-          uboot-ipq40xx/bin/*.md5
           uboot-ipq40xx/bin/*.zip
-          uboot-ipq40xx/build-info.txt
         retention-days: 90
-
-    - name: Upload build logs
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-logs-${{ env.BUILD_DATE }}
-        path: |
-          uboot-ipq40xx/*.log
-        retention-days: 3
-        if-no-files-found: ignore
 
     - name: Upload ccache stats
       if: always()
