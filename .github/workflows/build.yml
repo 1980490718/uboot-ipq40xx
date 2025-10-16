@@ -3,14 +3,14 @@ name: U-Boot CI
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
     inputs:
       board_name:
         description: 'Board name to build (e.g.: cdp, ap4220, all for all boards)'
         required: false
         default: 'all'
+permissions:
+  contents: write
 
 env:
   UBOOT_DIR: uboot
@@ -27,6 +27,7 @@ jobs:
       with:
         path: uboot-ipq40xx
         submodules: recursive
+        fetch-depth: 0
 
     - name: Setup environment
       run: |
@@ -43,6 +44,7 @@ jobs:
         echo "max_size = 2G" > ~/.ccache/ccache.conf
 
     - name: Cache and setup toolchain
+      id: cache-toolchain
       uses: actions/cache@v3
       with:
         path: openwrt-sdk-ipq806x-qsdk53
@@ -57,7 +59,7 @@ jobs:
         repository: 1980490718/openwrt-sdk-ipq806x-qsdk53
         path: openwrt-sdk-ipq806x-qsdk53
 
-    - name: Configure build environment
+    - name: Configure date and time
       id: config
       run: |
         # Set date variables
@@ -72,14 +74,10 @@ jobs:
     - name: Build U-Boot
       working-directory: ./uboot-ipq40xx
       run: |
-        # Build command
-        if [[ "${{ github.event.inputs.board_name }}" != "" && "${{ github.event.inputs.board_name }}" != "all" ]]; then
-          ./build.sh "${{ github.event.inputs.board_name }}"
-        elif [[ -n "$BOARD_NAME" && "$BOARD_NAME" != "" ]]; then
-          ./build.sh "$BOARD_NAME"
-        else
-          ./build.sh all
-        fi
+        git fetch --tags --unshallow || true
+        BOARD_INPUT="${{ github.event.inputs.board_name || env.BOARD_NAME || 'all' }}"
+        echo "Building board: $BOARD_INPUT"
+        ./build.sh "$BOARD_INPUT"
 
     - name: Archive artifacts
       if: success()
@@ -131,19 +129,11 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        # Define today's release tag
         TODAY_TAG="v${{ env.BUILD_DATE }}"
-
-        # Check if release exists
         echo "Checking for existing release with tag: $TODAY_TAG"
         if gh release view "$TODAY_TAG" > /dev/null 2>&1; then
           echo "Release $TODAY_TAG exists, deleting it..."
-          gh release delete "$TODAY_TAG" --yes
-          # Also delete the tag if it exists
-          if git ls-remote --tags origin "refs/tags/$TODAY_TAG" > /dev/null 2>&1; then
-            echo "Tag $TODAY_TAG exists, deleting it..."
-            git push origin --delete "refs/tags/$TODAY_TAG"
-          fi
+          gh release delete "$TODAY_TAG" --cleanup-tag --yes
         else
           echo "No existing release with tag: $TODAY_TAG"
         fi
@@ -159,6 +149,7 @@ jobs:
         name: "U-Boot Build ${{ env.BUILD_DATE }}"
         body: |
           Automated U-Boot build for IPQ40xx platforms
+          Board(s): ${{ github.event.inputs.board_name || env.BOARD_NAME }}
           Built on: ${{ env.BUILD_DATETIME }} (UTC+8)
           Branch: ${{ github.ref_name }}
           Latest commit: ${{ github.sha }}
